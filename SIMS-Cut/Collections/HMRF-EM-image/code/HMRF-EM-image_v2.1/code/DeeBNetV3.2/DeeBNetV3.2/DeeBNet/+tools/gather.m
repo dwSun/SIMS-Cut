@@ -22,9 +22,9 @@
 %freeEnergy function
 %y: gathered data matrix
 function [y] = gather(x)
-if(isobject(x) || isa(x,'gpuArray'))
-    y=gather(x);
-else
-    y=x;
-end
 
+    if (isobject(x) || isa(x, 'gpuArray'))
+        y = gather(x);
+    else
+        y = x;
+    end

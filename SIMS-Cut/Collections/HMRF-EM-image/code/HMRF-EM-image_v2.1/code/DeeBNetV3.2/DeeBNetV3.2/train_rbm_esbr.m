@@ -11,13 +11,13 @@ data = ESBR.prepare_input();
 % data.validationLabels=data.testLabels;
 
 % RBM
-rbmParams=RbmParameters(50,ValueType.binary);
-rbmParams.samplingMethodType=SamplingClasses.SamplingMethodType.FEPCD;
+rbmParams = RbmParameters(50, ValueType.binary);
+rbmParams.samplingMethodType = SamplingClasses.SamplingMethodType.FEPCD;
 % rbmParams.performanceMethod='freeEnergy';
-rbmParams.performanceMethod='classification';
+rbmParams.performanceMethod = 'classification';
 % rbmParams.learningRate=0.5;
-rbm=DiscriminativeRBM(rbmParams);
-rbmParams.maxEpoch=100;
+rbm = DiscriminativeRBM(rbmParams);
+rbmParams.maxEpoch = 100;
 
 %train
 rbm.train(data);

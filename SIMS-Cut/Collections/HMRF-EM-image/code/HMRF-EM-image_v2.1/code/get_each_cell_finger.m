@@ -1,31 +1,32 @@
-%ÊäÈëseparated_img£¬´ÓSeparate_cellµÃµ½£¬0ÊÇbg£¬·ÇÁãµÄÎªidx
-%ÊäÈëtest_samplesÎªe.g. 65536*20µÄÊı¾İ
+%è¾“å…¥separated_imgï¼Œä»Separate_cellå¾—åˆ°ï¼Œ0æ˜¯bgï¼Œéé›¶çš„ä¸ºidx
+%è¾“å…¥test_samplesä¸ºe.g. 65536*20çš„æ•°æ®
 
-function[all_cells_info,all_cells_mean,sep_labeling] = get_each_cell_finger(Labeling,test_samples)
+function [all_cells_info, all_cells_mean, sep_labeling] = get_each_cell_finger(Labeling, test_samples)
 
-img = reshape(Labeling,256,256);
-[separated_img]=Separate_cell(img);
-num_cells = max(separated_img(:));
-sep_labeling = separated_img(:);
-all_cells_info = {};
-all_cells_mean = [];
-for i=1:num_cells
-   idx_vector = find(sep_labeling==i);
-   cur_cell_info = test_samples(idx_vector,:);
-   all_cells_info{i} = cur_cell_info;
-   cur_cell_mean = mean(cur_cell_info);
-   all_cells_mean = [all_cells_mean;cur_cell_mean];
-%    b = bar(cur_cell_mean,0.1);
-%    saveas(b,['each_cell_finger_print/hela_brdu/',num2str(i),'_finger'],'fig');
-end
+    img = reshape(Labeling, 256, 256);
+    [separated_img] = Separate_cell(img);
+    num_cells = max(separated_img(:));
+    sep_labeling = separated_img(:);
+    all_cells_info = {};
+    all_cells_mean = [];
 
-% D = [];
-% %DÖ»±£´æ¾àÀë¾ØÕóµÄÉÏÈı½Ç
-% s = 100;
-% %sÊÇmmdÖĞgaussian kernelµÄsigma
-% for i=1:num_cells
-%    for j=i+1:num_cells
-%        D = [D,MMD(all_cells_info{i},all_cells_info{j},s)];
-%        disp([i,j]);
-%    end
-% end
+    for i = 1:num_cells
+        idx_vector = find(sep_labeling == i);
+        cur_cell_info = test_samples(idx_vector, :);
+        all_cells_info{i} = cur_cell_info;
+        cur_cell_mean = mean(cur_cell_info);
+        all_cells_mean = [all_cells_mean; cur_cell_mean];
+        %    b = bar(cur_cell_mean,0.1);
+        %    saveas(b,['each_cell_finger_print/hela_brdu/',num2str(i),'_finger'],'fig');
+    end
+
+    % D = [];
+    % %Dåªä¿å­˜è·ç¦»çŸ©é˜µçš„ä¸Šä¸‰è§’
+    % s = 100;
+    % %sæ˜¯mmdä¸­gaussian kernelçš„sigma
+    % for i=1:num_cells
+    %    for j=i+1:num_cells
+    %        D = [D,MMD(all_cells_info{i},all_cells_info{j},s)];
+    %        disp([i,j]);
+    %    end
+    % end

@@ -4,281 +4,257 @@
 file_sufix = '.mat';
 iters_max = 200;
 iters_num = 0
-for i=1:iters_max
-   cur_file = strcat(path,file_prefix,num2str(i),file_sufix);
-   
-	disp(cur_file)
-   if exist(cur_file, 'file') 
-       iters_num = i;
-   end
+
+for i = 1:iters_max
+    cur_file = strcat(path, file_prefix, num2str(i), file_sufix);
+
+    disp(cur_file)
+
+    if exist(cur_file, 'file')
+        iters_num = i;
+    end
+
 end
-disp(num2str(iters_num));
+
+% disp(num2str(iters_num));
 height = 256;
 fold_mean = 0.97;
 width = 256;
-%Ö¸´óÓÚ0.75·ÖÎ»ÊıµÄÏ¸°ûÒª¿¼ÂÇ·ÖÁÑ(75·ÖÎ»Êı)
+%æŒ‡å¤§äº0.75åˆ†ä½æ•°çš„ç»†èƒè¦è€ƒè™‘åˆ†è£‚(75åˆ†ä½æ•°)
 attention_threshold = 40;
-labeling_mat = zeros(height*width,iters_num);
-% ¹¹½¨labeling_mat£¬²¢¿´ÄÄ¸öÍ¼µÄcell×î¶à
-num_cells_li =[];
+labeling_mat = zeros(height * width, iters_num);
+% æ„å»ºlabeling_matï¼Œå¹¶çœ‹å“ªä¸ªå›¾çš„cellæœ€å¤š
+num_cells_li = [];
 num_pixels_li = [];
-for i=1:iters_num
-   cur_file = [path,file_prefix,num2str(i),file_sufix];
-   load(cur_file);
-  
-   [filtered_img,num_valid_cell,filtered_labeling] = filter_cell(cur_labeling,0);
-   img = reshape(filtered_labeling,256,256);
-    [separated_img]=Separate_cell(img);
-%     num_cells = max();        
-    labeling_mat(:,i) = separated_img(:);
-    num_pixels = sum(cur_labeling==2);
-    num_cells_li = [num_cells_li,num_valid_cell];
-    num_pixels_li = [num_pixels_li,num_pixels];
+
+for i = 1:iters_num
+    cur_file = [path, file_prefix, num2str(i), file_sufix];
+    load(cur_file);
+
+    [filtered_img, num_valid_cell, filtered_labeling] = filter_cell(cur_labeling, 0);
+    img = reshape(filtered_labeling, 256, 256);
+    [separated_img] = Separate_cell(img);
+    %     num_cells = max();
+    labeling_mat(:, i) = separated_img(:);
+    num_pixels = sum(cur_labeling == 2);
+    num_cells_li = [num_cells_li, num_valid_cell];
+    num_pixels_li = [num_pixels_li, num_pixels];
 end
-labeling_mat = labeling_mat(:,2:end);
-%µÚi¸öÎ»ÖÃ±íÊ¾iºÅ½ÚµãµÄ¸¸½ÚµãµÄidx,1ºÅ½ÚµãÊÇÈ«1
+
+labeling_mat = labeling_mat(:, 2:end);
+%ç¬¬iä¸ªä½ç½®è¡¨ç¤ºiå·èŠ‚ç‚¹çš„çˆ¶èŠ‚ç‚¹çš„idx,1å·èŠ‚ç‚¹æ˜¯å…¨1
 parent_list = [0];
-%¼ÇÂ¼µÚi¸ö½ÚµãÊôÓÚÄÄÒ»²ã£¬µÚ1²ãÊÇlabeling_1
+%è®°å½•ç¬¬iä¸ªèŠ‚ç‚¹å±äºå“ªä¸€å±‚ï¼Œç¬¬1å±‚æ˜¯labeling_1
 level_list = [0];
-%¼ÇÂ¼µÚi¸ö½ÚµãÊÇÄÇÒ»²ãµÄ¼¸ºÅÏ¸°û
+%è®°å½•ç¬¬iä¸ªèŠ‚ç‚¹æ˜¯é‚£ä¸€å±‚çš„å‡ å·ç»†èƒ
 cell_list = [1];
 area_list = [65536];
 
-
 lost_number = 0;
-iters_num = iters_num-1;
-%¼ÙÉèµÚÒ»¸ölabeling°üº¬ÁËbiasµÄkmeans£¬°ÑÈ«1µ±×÷¸ù½Úµã£¬´úºÅÎª1
- pre_lost = 0;
-for i=1:iters_num
-   cur_labeling = labeling_mat(:,i);
-   num_cells = max(cur_labeling);
-   if(i==1)
-       for j=1:num_cells
-           parent_list = [parent_list,1];
-           level_list = [level_list,1];
-           cell_list = [cell_list,j];
-           area_list = [area_list,sum(cur_labeling==j)];
-       end
-       continue;
-   end
-   pre_labeling = labeling_mat(:,i-1);
-   pre_idxs = (length(parent_list)-max(pre_labeling)+1+pre_lost):length(parent_list);
+iters_num = iters_num - 1;
+%å‡è®¾ç¬¬ä¸€ä¸ªlabelingåŒ…å«äº†biasçš„kmeansï¼ŒæŠŠå…¨1å½“ä½œæ ¹èŠ‚ç‚¹ï¼Œä»£å·ä¸º1
+pre_lost = 0;
 
-   pre_cells = cell_list(pre_idxs);
-   pre_lost = 0;
-   for j=1:num_cells
-      %°ÑĞÂÀ´µÄ½ÚµãµÄ¸¸½Úµã¼ÇÂ¼ÏÂÀ´
-      flag = 1;
-      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       for k=pre_cells
-%          if(max(max((cur_labeling==j)+(pre_labeling==k)))==2)
-%              
-%             
-%             %ËµÃ÷Á½²ãÕâÁ½¸ösegmentÓĞÖØµş
-%             parent_list = [parent_list,pre_idxs(k)];
-%             level_list = [level_list,i];
-%             cell_list = [cell_list,j];
-%             area_list = [area_list,sum(cur_labeling==j)];
-%             
-%             flag = 0;
-%             break;
-%     
-%              
-%          end
-%          
-%          
-%          
-%       end
-       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%        ÒªÇóÖØµşÃæ»ı×î´ó£¬²ÅÊÇ°Ö°Ö
-%         overlap_area_list = [];
-%         for k=pre_idxs
-%             overlap_area = sum((cur_labeling==j)+(pre_labeling==cell_list(k))==2);
-%             overlap_area_list = [overlap_area_list,overlap_area];
-%         end
-%         [max_area_val,max_area_ind] = max(overlap_area_list);
-%         if(max_area_val>0)
-%             %ËµÃ÷ÕÒµ½°Ö°ÖÁË
-%             flag= 0;
-%             
-%             parent_list = [parent_list,pre_idxs(max_area_ind)];
-%             level_list = [level_list,i];
-%             cell_list = [cell_list,j];
-%             area_list = [area_list,sum(cur_labeling==j)];
-%         
-%             %ËµÃ÷ÕÒ²»µ½°Ö°Ö£¬¶ªÊ§
-%         end
-       
-       
-       
-       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-       
-       for k=pre_idxs
-         if(max(max((cur_labeling==j)+(pre_labeling==cell_list(k))))==2)
-             
-            
-            %ËµÃ÷Á½²ãÕâÁ½¸ösegmentÓĞÖØµş
-            parent_list = [parent_list,k];
-            level_list = [level_list,i];
-            cell_list = [cell_list,j];
-            area_list = [area_list,sum(cur_labeling==j)];
-            
-            flag = 0;
-            break;
-    
-             
-         end
-         
-         
-         
-      end
-       
-       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-       
-       
-       
-%       ·¢ÏÖ¶ªÊ§ÁË770¸ö
-      if(flag)
-          pre_lost = pre_lost+1;
-         lost_number = lost_number+1; 
-         disp([num2str(i+1),',',num2str(j)]);
-         
-      end
-      
-   end
-    
+for i = 1:iters_num
+    cur_labeling = labeling_mat(:, i);
+    num_cells = max(cur_labeling);
+
+    if (i == 1)
+
+        for j = 1:num_cells
+            parent_list = [parent_list, 1];
+            level_list = [level_list, 1];
+            cell_list = [cell_list, j];
+            area_list = [area_list, sum(cur_labeling == j)];
+        end
+
+        continue;
+    end
+
+    pre_labeling = labeling_mat(:, i - 1);
+    pre_idxs = (length(parent_list) - max(pre_labeling) + 1 + pre_lost):length(parent_list);
+
+    pre_cells = cell_list(pre_idxs);
+    pre_lost = 0;
+
+    for j = 1:num_cells
+        %æŠŠæ–°æ¥çš„èŠ‚ç‚¹çš„çˆ¶èŠ‚ç‚¹è®°å½•ä¸‹æ¥
+        flag = 1;
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %       for k=pre_cells
+        %          if(max(max((cur_labeling==j)+(pre_labeling==k)))==2)
+        %
+        %
+        %             %è¯´æ˜ä¸¤å±‚è¿™ä¸¤ä¸ªsegmentæœ‰é‡å 
+        %             parent_list = [parent_list,pre_idxs(k)];
+        %             level_list = [level_list,i];
+        %             cell_list = [cell_list,j];
+        %             area_list = [area_list,sum(cur_labeling==j)];
+        %
+        %             flag = 0;
+        %             break;
+        %
+        %
+        %          end
+        %
+        %
+        %
+        %       end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %        è¦æ±‚é‡å é¢ç§¯æœ€å¤§ï¼Œæ‰æ˜¯çˆ¸çˆ¸
+        %         overlap_area_list = [];
+        %         for k=pre_idxs
+        %             overlap_area = sum((cur_labeling==j)+(pre_labeling==cell_list(k))==2);
+        %             overlap_area_list = [overlap_area_list,overlap_area];
+        %         end
+        %         [max_area_val,max_area_ind] = max(overlap_area_list);
+        %         if(max_area_val>0)
+        %             %è¯´æ˜æ‰¾åˆ°çˆ¸çˆ¸äº†
+        %             flag= 0;
+        %
+        %             parent_list = [parent_list,pre_idxs(max_area_ind)];
+        %             level_list = [level_list,i];
+        %             cell_list = [cell_list,j];
+        %             area_list = [area_list,sum(cur_labeling==j)];
+        %
+        %             %è¯´æ˜æ‰¾ä¸åˆ°çˆ¸çˆ¸ï¼Œä¸¢å¤±
+        %         end
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        for k = pre_idxs
+
+            if (max(max((cur_labeling == j) + (pre_labeling == cell_list(k)))) == 2)
+
+                %è¯´æ˜ä¸¤å±‚è¿™ä¸¤ä¸ªsegmentæœ‰é‡å 
+                parent_list = [parent_list, k];
+                level_list = [level_list, i];
+                cell_list = [cell_list, j];
+                area_list = [area_list, sum(cur_labeling == j)];
+
+                flag = 0;
+                break;
+
+            end
+
+        end
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        %       å‘ç°ä¸¢å¤±äº†770ä¸ª
+        if (flag)
+            pre_lost = pre_lost + 1;
+            lost_number = lost_number + 1;
+            disp([num2str(i + 1), ',', num2str(j)]);
+
+        end
+
+    end
+
 end
 
-
-%ÕÒ³öËùÓĞµÄÒ¶×Ó½Úµã£¬²¢¸³¸øfinal_labeling
+%æ‰¾å‡ºæ‰€æœ‰çš„å¶å­èŠ‚ç‚¹ï¼Œå¹¶èµ‹ç»™final_labeling
 parent_set = unique(parent_list);
 all_set = 1:length(parent_list);
-leaf_set = setdiff(all_set,parent_set);
+leaf_set = setdiff(all_set, parent_set);
 
 mean_leaf_area = median(area_list(leaf_set));
-area_threshold = fold_mean*mean_leaf_area;
+area_threshold = fold_mean * mean_leaf_area;
 single_leaf_set = leaf_set;
-%¶ÔÃ¿Ò»¸öÒ¶×Ó½ÚµãÍùÉÏ»ØËİ£¬ÕÒµ½level×îµÍµÄ²»·ÖÁÑ½Úµã
+%å¯¹æ¯ä¸€ä¸ªå¶å­èŠ‚ç‚¹å¾€ä¸Šå›æº¯ï¼Œæ‰¾åˆ°levelæœ€ä½çš„ä¸åˆ†è£‚èŠ‚ç‚¹
 intensity_134_list_count = 1;
-intensity_134_list= [];
-for i=leaf_set
-    
-        if(length(intensity_134_list)>=2)
-        disp(['---------------',num2str(length(intensity_134_list))]);
+intensity_134_list = [];
+
+for i = leaf_set
+
+    if (length(intensity_134_list) >= 2)
+        disp(['---------------', num2str(length(intensity_134_list))]);
         intensity_134_list_cell{intensity_134_list_count} = intensity_134_list;
-        intensity_134_list_count = intensity_134_list_count+1;
+        intensity_134_list_count = intensity_134_list_count + 1;
     end
-    
-    intensity_134_list= [];
+
+    intensity_134_list = [];
     ori_leaf = i;
     cur_leaf = i;
     cur_leaf_level = level_list(i);
 
-   while(cur_leaf~=0)
-       
-       
-        
+    while (cur_leaf ~= 0)
+
         cur_leaf_cell = cell_list(cur_leaf);
-        cur_134_mean = mean(test_samples_20(labeling_mat(:,cur_leaf_level)==cur_leaf_cell,1));
-        intensity_134_list = [intensity_134_list,cur_134_mean];
-        
-        if(length(intensity_134_list)==1)
+        cur_134_mean = mean(test_samples_20(labeling_mat(:, cur_leaf_level) == cur_leaf_cell, 1));
+        intensity_134_list = [intensity_134_list, cur_134_mean];
+
+        if (length(intensity_134_list) == 1)
             foldchange_intensity_134 = 1;
         else
-            foldchange_intensity_134 = intensity_134_list(end)/intensity_134_list(end-1);
+            foldchange_intensity_134 = intensity_134_list(end) / intensity_134_list(end - 1);
         end
-        
-       
-        
-%        ÏÈ¿´µ±Ç°²ãÓĞÃ»ÓĞleaf¸úcurleafÊÇÍ¬Ò»¸ö°Ö°Ö
-       check_brother = sum(parent_list(level_list==cur_leaf_level)==parent_list(cur_leaf));
-       if(check_brother==0)
-           disp('error');
-           
-%            ÉÏÉıµ½·Ö²æÕâ¸öÌõ¼şÃ»ÎÊÌâ£¬ÒòÎªÖ»ÒªÓĞ¹µÛÖ
-%           ÖØµãÊÇÒª¾ö¶¨ÉÏÉıµ½ÄÄÒ»²ãÍ£Ö¹£¿µ¥´¿ÓÃthreshold²»ĞĞ
-% ·½°¸£ºÉÏÉıµ½Æ½¾ù134µÄĞÅºÅ²»¼õÈõ£¿»òÕß»­Ò»¸öÉÏÉı¹ı³ÌÖĞÆ½¾ù134µÄ±ä»¯Í¼£¨Ó¦¸ÃÊÇÏÂ½µÇ÷ÊÆ£©£¬È¡¹Õµã¡£
-% ÏÖÔÚ£ºÖ»Òª134µÄÆ½¾ùÖµÏÂ½µÁË°Ù·ÖÖ®*¾ÍÍ£Ö¹ÉÏÉı
-% »òÕßËµ134µÄÆ½¾ù£¬Ã»ÓĞ½µµ½Ô­À´µÄ°Ù·ÖÖ®*²ÅÍ£Ö¹
 
-%        elseif(check_brother==1 & area_list(cur_leaf)<=area_threshold)
-        elseif(check_brother==1 && foldchange_intensity_134>=fold_mean)
-           %ËµÃ÷¿ÉÒÔÍùÉÏ×ß
-           cur_leaf = parent_list(cur_leaf);
-%            cur_leaf_level = cur_leaf_level-1;
+        %        å…ˆçœ‹å½“å‰å±‚æœ‰æ²¡æœ‰leafè·Ÿcurleafæ˜¯åŒä¸€ä¸ªçˆ¸çˆ¸
+        check_brother = sum(parent_list(level_list == cur_leaf_level) == parent_list(cur_leaf));
+
+        if (check_brother == 0)
+            disp('error');
+
+            %            ä¸Šå‡åˆ°åˆ†å‰è¿™ä¸ªæ¡ä»¶æ²¡é—®é¢˜ï¼Œå› ä¸ºåªè¦æœ‰æ²Ÿå£‘
+            %           é‡ç‚¹æ˜¯è¦å†³å®šä¸Šå‡åˆ°å“ªä¸€å±‚åœæ­¢ï¼Ÿå•çº¯ç”¨thresholdä¸è¡Œ
+            % æ–¹æ¡ˆï¼šä¸Šå‡åˆ°å¹³å‡134çš„ä¿¡å·ä¸å‡å¼±ï¼Ÿæˆ–è€…ç”»ä¸€ä¸ªä¸Šå‡è¿‡ç¨‹ä¸­å¹³å‡134çš„å˜åŒ–å›¾ï¼ˆåº”è¯¥æ˜¯ä¸‹é™è¶‹åŠ¿ï¼‰ï¼Œå–æ‹ç‚¹ã€‚
+            % ç°åœ¨ï¼šåªè¦134çš„å¹³å‡å€¼ä¸‹é™äº†ç™¾åˆ†ä¹‹*å°±åœæ­¢ä¸Šå‡
+            % æˆ–è€…è¯´134çš„å¹³å‡ï¼Œæ²¡æœ‰é™åˆ°åŸæ¥çš„ç™¾åˆ†ä¹‹*æ‰åœæ­¢
+
+            %        elseif(check_brother==1 & area_list(cur_leaf)<=area_threshold)
+        elseif (check_brother == 1 && foldchange_intensity_134 >= fold_mean)
+            %è¯´æ˜å¯ä»¥å¾€ä¸Šèµ°
+            cur_leaf = parent_list(cur_leaf);
+            %            cur_leaf_level = cur_leaf_level-1;
             cur_leaf_level = level_list(cur_leaf);
-       else
-           %²»ÄÜÍùÉÏ×ß
-           single_leaf_set(single_leaf_set==ori_leaf) = cur_leaf;
-           disp(['change ',num2str(ori_leaf),'to ',num2str(cur_leaf)]);
-           break;
-       end
-       
-       
-       
-   end
+        else
+            %ä¸èƒ½å¾€ä¸Šèµ°
+            single_leaf_set(single_leaf_set == ori_leaf) = cur_leaf;
+            disp(['change ', num2str(ori_leaf), 'to ', num2str(cur_leaf)]);
+            break;
+        end
+
+    end
+
 end
 
+final_labeling = zeros(65536, 1);
+leaf_labeling = zeros(65536, 1);
 
-final_labeling = zeros(65536,1);
-leaf_labeling = zeros(65536,1);
-for i=single_leaf_set
-   cur_leaf_level = level_list(i);
-   cur_leaf_cell = cell_list(i);
-   final_labeling(labeling_mat(:,cur_leaf_level)==cur_leaf_cell) = 1;
+for i = single_leaf_set
+    cur_leaf_level = level_list(i);
+    cur_leaf_cell = cell_list(i);
+    final_labeling(labeling_mat(:, cur_leaf_level) == cur_leaf_cell) = 1;
 end
 
-for i=leaf_set
-   cur_leaf_level = level_list(i);
-   cur_leaf_cell = cell_list(i);
-   leaf_labeling(labeling_mat(:,cur_leaf_level)==cur_leaf_cell) = 1;
+for i = leaf_set
+    cur_leaf_level = level_list(i);
+    cur_leaf_cell = cell_list(i);
+    leaf_labeling(labeling_mat(:, cur_leaf_level) == cur_leaf_cell) = 1;
 end
 
-final_labeling = final_labeling+1;
+final_labeling = final_labeling + 1;
 leaf_labeling = leaf_labeling + 1;
-[~,final_num_cells,final_labeling] = filter_cell(final_labeling,1);
-disp(['there are ',num2str(final_num_cells),' valid cells']);
+[~, final_num_cells, final_labeling] = filter_cell(final_labeling, 1);
+disp(['there are ', num2str(final_num_cells), ' valid cells']);
 % subplot(1,2,1);
 % imshow(reshape(leaf_labeling,256,256)',[]);
 % subplot(1,2,2);
 % imshow(reshape(final_labeling,256,256)',[]);
-save(strcat(save_final_labeling_path,'final_labeling_',num2str(beta),'.mat'),'final_labeling');
+save(strcat(save_final_labeling_path, 'final_labeling_', num2str(beta), '.mat'), 'final_labeling');
 
-final_labeling_img = logical(reshape(final_labeling,256,256)'-1);
-imwrite(final_labeling_img,strcat(save_final_labeling_path,'final_labeling_',num2str(beta),'.png'));
-img_134 = reshape(test_samples_20(:,1),256,256)';
-imshowpair(img_134,final_labeling_img);
-print(strcat(save_final_labeling_path,'final_labeling_merge134_',num2str(beta),'.png'),'-dpng');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+final_labeling_img = logical(reshape(final_labeling, 256, 256)' - 1);
+imwrite(final_labeling_img, strcat(save_final_labeling_path, 'final_labeling_', num2str(beta), '.png'));
+img_134 = reshape(test_samples_20(:, 1), 256, 256)';
+imshowpair(img_134, final_labeling_img);
+print(strcat(save_final_labeling_path, 'final_labeling_merge134_', num2str(beta), '.png'), '-dpng');
 
 % [max_cell_num,max_cell_idx] = max(num_cells_li);
-% % ¿ªÊ¼·ÖÎö³õÊ¼Í¼ÖĞµÄÏ¸°û
+% % å¼€å§‹åˆ†æåˆå§‹å›¾ä¸­çš„ç»†èƒ
 % max_cell_idx=2;
-% %maxÎªÏ¸°û¸öÊı£¬minÎª0£¨»ùµÍ£©
-% 
+% %maxä¸ºç»†èƒä¸ªæ•°ï¼Œminä¸º0ï¼ˆåŸºä½ï¼‰
+%
 % init_image_labeling = labeling_mat(:,max_cell_idx);
 % max_cell_num = max(init_image_labeling);
 % final_labeling = init_image_labeling;
@@ -302,27 +278,27 @@ print(strcat(save_final_labeling_path,'final_labeling_merge134_',num2str(beta),'
 %         j_sep_labeling = labeling_mat(:,j);
 %         j_in_region = j_sep_labeling(region_idxs);
 %         if(all(j_in_region))
-%             %Èç¹ûÃ»ÓĞ0£¬Ó¦´ÓÏÂÒ»¸öjÖĞÕÒ
+%             %å¦‚æœæ²¡æœ‰0ï¼Œåº”ä»ä¸‹ä¸€ä¸ªjä¸­æ‰¾
 %             in_region_cells_li = [in_region_cells_li,0];
 %             continue;
 %         end
-% %         È¥µô0Ö®ºó£¬¿´Õâ¸öÇøÓòÀïÓĞ¶àÉÙ¸ö²»Í¬cell
+% %         å»æ‰0ä¹‹åï¼Œçœ‹è¿™ä¸ªåŒºåŸŸé‡Œæœ‰å¤šå°‘ä¸ªä¸åŒcell
 %         j_in_region = j_in_region(j_in_region~=0);
 %         cell_idx_j = unique(j_in_region);
 %         j_in_region_dict{j-max_cell_idx} = cell_idx_j;
 %         num_cells_in_region = length(cell_idx_j);
 %         in_region_cells_li = [in_region_cells_li,num_cells_in_region];
-%         
+%
 %         cell_area_li = [];
 %         for k=cell_idx_j'
 %             cell_area_li = [cell_area_li,sum(j_sep_labeling==k)];
 %         end
 %         cell_area_li_dict{j-max_cell_idx} = cell_area_li;
 %         cell_area_var_li = [cell_area_var_li,var(cell_area_li)];
-%         
+%
 %     end
 % %     [select_j_value,~] = max(in_region_cells_li);
-%     %Ñ¡Ôñ·ÖÁÑ³öÀ´×î¶àµÄÏ¸°û£¬¿ÉÄÜÓĞºÃ¼¸¸öÍ¼¶¼ÊÇ×î¶àµÄ£¬Ñ¡·½²î×îĞ¡µÄ¡£
+%     %é€‰æ‹©åˆ†è£‚å‡ºæ¥æœ€å¤šçš„ç»†èƒï¼Œå¯èƒ½æœ‰å¥½å‡ ä¸ªå›¾éƒ½æ˜¯æœ€å¤šçš„ï¼Œé€‰æ–¹å·®æœ€å°çš„ã€‚
 % %     [select_j_va]
 % %     cell_area_var_li(in_region_cells_li>=max(select_j_value-1,1))=inf;
 % %     [~,select_j] = min(cell_area_var_li);
@@ -330,28 +306,28 @@ print(strcat(save_final_labeling_path,'final_labeling_merge134_',num2str(beta),'
 %      [~,select_j] = max(in_region_cells_li);
 %      j_area_li = cell_area_li_dict{select_j};
 %      j_idx_li = j_in_region_dict{select_j};
-%      
+%
 %      illigel = j_idx_li(j_area_li>=thre_area);
 % %      if(length(j_area_li)>=1)
 % %         disp(i,j) ;
 % %      end
-%      
-%      
+%
+%
 %     select_j = select_j + max_cell_idx;
-%     %select_j¾ÍÊÇÓ¦¸ÃÌæ»»µôattentionµÄimgÖĞµÚi¸öcellµÄÍ¼
+%     %select_jå°±æ˜¯åº”è¯¥æ›¿æ¢æ‰attentionçš„imgä¸­ç¬¬iä¸ªcellçš„å›¾
 %     j_sep_labeling = labeling_mat(:,select_j);
 %     j_in_region = j_sep_labeling(region_idxs);
 %     added_j_in_region = j_in_region;
 %     max_final_labeling = max(final_labeling);
 %     added_j_in_region(added_j_in_region~=0) = added_j_in_region(added_j_in_region~=0)+max_final_labeling;
-%     
+%
 % %      final_labeling(region_idxs)=0;
 %     final_labeling(region_idxs)  =added_j_in_region;
 %     attention_cells = [attention_cells,illigel'+max_final_labeling];
 %     i
-%     
+%
 % end
-% 
+%
 % final_labeling(final_labeling~=0)=1;
 % final_labeling = final_labeling+1;
 % subplot(1,2,1);
@@ -359,9 +335,8 @@ print(strcat(save_final_labeling_path,'final_labeling_merge134_',num2str(beta),'
 % subplot(1,2,2);
 % imshow(reshape(init_image_labeling,256,256)');
 % [~,final_num_cells,~] = filter_cell(final_labeling,3);
-% disp(['ÓĞ',num2str(final_num_cells),'¸öÓĞĞ§Ï¸°û']);
-% 
-% 
+% disp(['æœ‰',num2str(final_num_cells),'ä¸ªæœ‰æ•ˆç»†èƒ']);
+%
+%
 % % cur_labeling_0704_yidao_20_Fmeasure_0.5_ada21auto_div5__1.mat
 % % cur_labeling_0704_yidao_20_Fmeasure_0.5_ada21auto_div10__1.mat
-

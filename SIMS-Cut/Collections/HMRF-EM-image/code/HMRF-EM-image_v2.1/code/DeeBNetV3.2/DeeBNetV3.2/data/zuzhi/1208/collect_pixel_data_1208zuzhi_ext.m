@@ -1,5 +1,5 @@
-% 276Œ¨£¨«∞¡ΩŒ¨ « Br∫ÕI
-%BR∫ÕI∑≈‘⁄datamatµƒ◊Ó∫Û¡ΩŒª
+% 276Áª¥ÔºåÂâç‰∏§Áª¥ÊòØ BrÂíåI
+%BRÂíåIÊîæÂú®datamatÁöÑÊúÄÂêé‰∏§‰Ωç
 
 % data_file = {
 % %     'liver-cancer-1_all.mat',
@@ -8,7 +8,7 @@
 % %     'liver-xwh-2-1_all.mat',
 % %     'liver-xwh-2-2_all.mat',
 % %     'liver-xwh-3_all.mat'
-%       
+%
 % %       '181109_liver_highres_223.mat',
 % %       '181109_liver_highres_223.mat'
 % % '181119_liver_181.mat',
@@ -52,35 +52,35 @@
 
 label_path = 'labeling\';
 % data_file={
-% 'C:\Users\yzy\Documents\SIMS\MATLAB\MATLAB\Add-Ons\Collections\HMRF-EM-image\code\HMRF-EM-image_v2.1\code\DeeBNetV3.2\DeeBNetV3.2\data\hunyang\MIX-BRDU_all.mat'    
+% 'C:\Users\yzy\Documents\SIMS\MATLAB\MATLAB\Add-Ons\Collections\HMRF-EM-image\code\HMRF-EM-image_v2.1\code\DeeBNetV3.2\DeeBNetV3.2\data\hunyang\MIX-BRDU_all.mat'
 % }
 % label_file = {
-% 'C:\Users\yzy\Documents\SIMS\MATLAB\MATLAB\Add-Ons\Collections\HMRF-EM-image\code\HMRF-EM-image_v2.1\code\DeeBNetV3.2\DeeBNetV3.2\data\hunyang\÷–º‰Ω·π˚\MIX-BRDU_0724_labeling.mat'    
+% 'C:\Users\yzy\Documents\SIMS\MATLAB\MATLAB\Add-Ons\Collections\HMRF-EM-image\code\HMRF-EM-image_v2.1\code\DeeBNetV3.2\DeeBNetV3.2\data\hunyang\‰∏≠Èó¥ÁªìÊûú\MIX-BRDU_0724_labeling.mat'
 % }
 
 data_mat = [];
-disp(['idx',num2str(idx)])
+disp(['idx', num2str(idx)])
 %return
-for i=1:idx
-load(data_file{i});
-load(label_file{i});
-cur_labeling = final_labeling;
-[filtered_img,num_valid_cell,cur_labeling] = filter_cell_ext(cur_labeling,1,sz);
+for i = 1:idx
+    load(data_file{i});
+    load(label_file{i});
+    cur_labeling = final_labeling;
+    [filtered_img, num_valid_cell, cur_labeling] = filter_cell_ext(cur_labeling, 1, sz);
 
-[cur_cells,cur_cells_mean,sep_labeling] = get_each_cell_finger_ext(cur_labeling,test_samples,sz); 
+    [cur_cells, cur_cells_mean, sep_labeling] = get_each_cell_finger_ext(cur_labeling, test_samples, sz);
 
+    for j = 0:num_valid_cell
+        cur_batch = i;
+        cur_idxs = find(sep_labeling == j);
+        cur_pixels = test_samples(cur_idxs, :);
 
-for j=0:num_valid_cell
-    cur_batch = i;
-       cur_idxs = find(sep_labeling==j);
-       cur_pixels = test_samples(cur_idxs,:);
-       
-%        cur_pixels = cur_cells{j};
-       
-       cur_cellidx = j;
-       
-       to_add = [repmat([cur_batch,cur_cellidx],size(cur_pixels,1),1),cur_idxs,cur_pixels];
-%        to_add = to_add(:,1:289);
-       data_mat = [data_mat;to_add];
-end
+        %        cur_pixels = cur_cells{j};
+
+        cur_cellidx = j;
+
+        to_add = [repmat([cur_batch, cur_cellidx], size(cur_pixels, 1), 1), cur_idxs, cur_pixels];
+        %        to_add = to_add(:,1:289);
+        data_mat = [data_mat; to_add];
+    end
+
 end

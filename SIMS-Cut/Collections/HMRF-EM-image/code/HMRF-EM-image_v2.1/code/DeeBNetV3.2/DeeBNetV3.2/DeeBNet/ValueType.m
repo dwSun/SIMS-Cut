@@ -22,15 +22,14 @@
 %**************************************************************************
 %ValueType class or enumeration
 classdef ValueType
-    
+
     % binary: Units are 0 or 1
     % probability: Units are in [0,1]
     % gaussian: Units are in [-Inf,+Inf] with zero mean and unit variance
     properties (Constant)
-      binary=1;
-      probability=2;
-      gaussian=3;
+        binary = 1;
+        probability = 2;
+        gaussian = 3;
     end
-    
-end
 
+end

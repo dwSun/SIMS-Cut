@@ -25,16 +25,18 @@
 %maxValue: equal to or greater than the maximum index
 %vector: a sparse matrix of vectors
 
-function [vector]=ind2vec(ind,maxValue)
-  % Converts indices to vectors
-  if (nargin<2)
-    maxValue=max(ind);
-  end
-  if (~isrow(ind))
-      error('ind is not row vector');
-  end
-  ind=[ind,maxValue];
-  vectors = length(ind);
-  vector = sparse(ind,1:vectors,ones(1,vectors));
-  vector(:,end)=[];
+function [vector] = ind2vec(ind, maxValue)
+    % Converts indices to vectors
+    if (nargin < 2)
+        maxValue = max(ind);
+    end
+
+    if (~isrow(ind))
+        error('ind is not row vector');
+    end
+
+    ind = [ind, maxValue];
+    vectors = length(ind);
+    vector = sparse(ind, 1:vectors, ones(1, vectors));
+    vector(:, end) = [];
 end

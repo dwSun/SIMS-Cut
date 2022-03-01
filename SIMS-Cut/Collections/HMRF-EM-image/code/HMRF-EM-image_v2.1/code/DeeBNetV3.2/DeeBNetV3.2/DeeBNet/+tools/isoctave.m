@@ -21,13 +21,13 @@
 %**************************************************************************
 %isoctave function
 %t: Returns 1 if the operating environment is octave, otherwise 0
-function [t]=isoctave()
+function [t] = isoctave()
 
-if exist('OCTAVE_VERSION')
-    % Only Octave has this variable.
-    t=1;
-else
-    t=0;
-end
+    if exist('OCTAVE_VERSION')
+        % Only Octave has this variable.
+        t = 1;
+    else
+        t = 0;
+    end
 
-end%End of isoctave function
+    end %End of isoctave function

@@ -1,53 +1,45 @@
-function[bg_rbm,fg_rbm,PF] = train_rbm_multi_ext(normed_data,Labeling,n_hidden,n_epoch,beta,sz,train_ratio)
+function [bg_rbm, fg_rbm, PF] = train_rbm_multi_ext(normed_data, Labeling, n_hidden, n_epoch, beta, sz, train_ratio)
 
+    %æ¯ä¸€ç±»ç”¨å•ç‹¬çš„RBM
+    Width = sz;
+    Height = sz;
+    d = 20;
+    %train_ratio = 0.1;
+    %Labelingä»£è¡¨åˆ†å‰²çš„ç»“æœã€‚1æ˜¯bgï¼›2æ˜¯fgã€‚
+    % Labeling æ˜¯65536*1ã€‚ä½ç½®å’Œtest_samplesä½ç½®ä¸€è‡´
+    % Labeling = zeros(Width,Height);
 
-%Ã¿Ò»ÀàÓÃµ¥¶ÀµÄRBM
-Width = sz;
-Height = sz;
-d = 20;
-%train_ratio = 0.1;
-%Labeling´ú±í·Ö¸îµÄ½á¹û¡£1ÊÇbg£»2ÊÇfg¡£
-% Labeling ÊÇ65536*1¡£Î»ÖÃºÍtest_samplesÎ»ÖÃÒ»ÖÂ
-% Labeling = zeros(Width,Height);
+    %test_samplesä»£è¡¨æ•°æ®ï¼Œ65536*20
+    % test_samples = zeros(Width*Height,d);
 
+    % processed_test_samples = preprocess_samples(test_samples);
+    % processed_test_samples = test_samples/max(test_samples(:));
+    processed_test_samples = normed_data;
 
+    bg_samples = processed_test_samples(Labeling == 1, :);
+    fg_samples = processed_test_samples(Labeling == 2, :);
 
-%test_samples´ú±íÊı¾İ£¬65536*20
-% test_samples = zeros(Width*Height,d);
+    bg_samples_shuffle = bg_samples(randperm(size(bg_samples, 1)), :);
+    fg_samples_shuffle = fg_samples(randperm(size(fg_samples, 1)), :);
 
-% processed_test_samples = preprocess_samples(test_samples);
-% processed_test_samples = test_samples/max(test_samples(:));
-processed_test_samples = normed_data;
+    %train_count_bg = min(train_ratio*size(bg_samples_shuffle,1),10000);
+    %train_count_fg = min(train_ratio*size(fg_samples_shuffle,1),10000);
 
-bg_samples = processed_test_samples(Labeling==1,:);
-fg_samples = processed_test_samples(Labeling==2,:);
+    train_count_bg = train_ratio * size(bg_samples_shuffle, 1)
+    train_count_fg = train_ratio * size(fg_samples_shuffle, 1)
+    bg_train_samples = bg_samples_shuffle(1:train_count_bg, :);
+    bg_test_samples = bg_samples_shuffle(train_count_bg + 1:end, :);
+    %bg_test_samples = bg_train_samples;
+    %bg_train_samples = bg_samples_shuffle(1:train_ratio*size(bg_samples_shuffle,1),:);
+    %bg_test_samples = bg_samples_shuffle(train_ratio*size(bg_samples_shuffle,1)+1:end,:);
+    fg_train_samples = fg_samples_shuffle(1:train_count_fg, :);
+    fg_test_samples = fg_samples_shuffle(train_count_fg + 1:end, :);
+    %fg_test_samples = fg_train_samples;
+    %fg_train_samples = fg_samples_shuffle(1:train_ratio*size(fg_samples_shuffle,1),:);
+    %fg_test_samples = fg_samples_shuffle(train_ratio*size(fg_samples_shuffle,1)+1:end,:);
 
-bg_samples_shuffle = bg_samples(randperm(size(bg_samples,1)),:);
-fg_samples_shuffle = fg_samples(randperm(size(fg_samples,1)),:);
+    bg_rbm = train_one_rbm(bg_train_samples, bg_test_samples, n_hidden, n_epoch);
 
-%train_count_bg = min(train_ratio*size(bg_samples_shuffle,1),10000);
-%train_count_fg = min(train_ratio*size(fg_samples_shuffle,1),10000);
+    fg_rbm = train_one_rbm(fg_train_samples, fg_test_samples, n_hidden, n_epoch);
 
-train_count_bg = train_ratio*size(bg_samples_shuffle,1)
-train_count_fg = train_ratio*size(fg_samples_shuffle,1)
-bg_train_samples = bg_samples_shuffle(1:train_count_bg,:);
-bg_test_samples = bg_samples_shuffle(train_count_bg+1:end,:);
-%bg_test_samples = bg_train_samples;
-%bg_train_samples = bg_samples_shuffle(1:train_ratio*size(bg_samples_shuffle,1),:);
-%bg_test_samples = bg_samples_shuffle(train_ratio*size(bg_samples_shuffle,1)+1:end,:);
-fg_train_samples = fg_samples_shuffle(1:train_count_fg,:);
-fg_test_samples = fg_samples_shuffle(train_count_fg+1:end,:);
-%fg_test_samples = fg_train_samples;
-%fg_train_samples = fg_samples_shuffle(1:train_ratio*size(fg_samples_shuffle,1),:);
-%fg_test_samples = fg_samples_shuffle(train_ratio*size(fg_samples_shuffle,1)+1:end,:);
-
-
-
-
-
-bg_rbm=train_one_rbm(bg_train_samples,bg_test_samples,n_hidden,n_epoch);
-
-fg_rbm=train_one_rbm(fg_train_samples,fg_test_samples,n_hidden,n_epoch);
-
-PF = train_softmax2(bg_train_samples,bg_test_samples,bg_rbm,fg_train_samples,fg_test_samples,fg_rbm,beta);
-
+    PF = train_softmax2(bg_train_samples, bg_test_samples, bg_rbm, fg_train_samples, fg_test_samples, fg_rbm, beta);

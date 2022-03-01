@@ -23,7 +23,7 @@
 %eta: input matrix
 %mu: matrix of the softmax function
 function mu = softmax(eta)
-% This file is from 
+    % This file is from
     tmp = exp(eta);
     denom = sum(tmp, 1);
     mu = bsxfun(@rdivide, tmp, denom);

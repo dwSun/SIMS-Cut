@@ -25,52 +25,52 @@
 %           AUT(Amirkabir University of Technology), Tehran, Iran
 %**************************************************************************
 %SparseDiscriminativeRBM Class
-classdef SparseDiscriminativeRBM<DiscriminativeRBM & SparseRBM
-    
+classdef SparseDiscriminativeRBM < DiscriminativeRBM & SparseRBM
+
     %% PUBLIC METHODS ------------------------------------------------------
-    methods (Access=public)
+    methods (Access = public)
         %Constructor
-        function obj=SparseDiscriminativeRBM(rbmParams)
-            obj=obj@DiscriminativeRBM(rbmParams);
-            obj=obj@SparseRBM(rbmParams);
+        function obj = SparseDiscriminativeRBM(rbmParams)
+            obj = obj@DiscriminativeRBM(rbmParams);
+            obj = obj@SparseRBM(rbmParams);
         end %End of Constructor function
-        
+
     end %End PUBLIC METHODS
-    
+
     %% PROTECTED METHODS --------------------------------------------------
-    methods (Access=protected)
-        
-        function [deltaWeightReg,deltaVisBiasReg,deltaHidBiasReg]=getRegularizationGradient(obj,batchData,posHid)
+    methods (Access = protected)
+
+        function [deltaWeightReg, deltaVisBiasReg, deltaHidBiasReg] = getRegularizationGradient(obj, batchData, posHid)
+
             switch obj.rbmParams.sparsityMethod
-                % based on paper [1]
+                    % based on paper [1]
                 case 'quadratic'
-                    term1=obj.rbmParams.sparsityTarget-posHid;
-                    term2=1/size(batchData,1)*(batchData'*((posHid).*(1-posHid)));
-                    term3=mean((posHid).*(1-posHid));
-                    deltaHidBiasReg=obj.rbmParams.sparsityCost.*mean(term1).*term3;
-                    deltaWeightReg=obj.rbmParams.sparsityCost*repmat(mean(term1),size(batchData,2),1).*term2;
+                    term1 = obj.rbmParams.sparsityTarget - posHid;
+                    term2 = 1 / size(batchData, 1) * (batchData' * ((posHid) .* (1 - posHid)));
+                    term3 = mean((posHid) .* (1 - posHid));
+                    deltaHidBiasReg = obj.rbmParams.sparsityCost .* mean(term1) .* term3;
+                    deltaWeightReg = obj.rbmParams.sparsityCost * repmat(mean(term1), size(batchData, 2), 1) .* term2;
                     % based on paper [2]
                 case 'rateDistortion'
-                    term2=-1/size(batchData,1)*(batchData'*((posHid).*(1-posHid)));
-                    term3=-mean((posHid).*(1-posHid));
-                    deltaHidBiasReg=obj.rbmParams.sparsityCost*term3;
-                    deltaWeightReg=obj.rbmParams.sparsityCost*term2;
+                    term2 = -1 / size(batchData, 1) * (batchData' * ((posHid) .* (1 - posHid)));
+                    term3 = -mean((posHid) .* (1 - posHid));
+                    deltaHidBiasReg = obj.rbmParams.sparsityCost * term3;
+                    deltaWeightReg = obj.rbmParams.sparsityCost * term2;
                     % based on our paper
                 case 'normal'
-                    term1=obj.rbmParams.sparsityTarget-posHid;
-                    term2=1/size(batchData,1)*(batchData'*((posHid).*(1-posHid)));
-                    term3=mean((posHid).*(1-posHid));
-                    term4=normpdf(mean(posHid),obj.rbmParams.sparsityTarget,sqrt(obj.rbmParams.sparsityVariance));
-                    deltaHidBiasReg=obj.rbmParams.sparsityCost*mean(term1).*term3.*term4;
-                    deltaWeightReg=obj.rbmParams.sparsityCost*repmat(mean(term1),size(batchData,2),1).*term2.*repmat(term4,size(batchData,2),1);
+                    term1 = obj.rbmParams.sparsityTarget - posHid;
+                    term2 = 1 / size(batchData, 1) * (batchData' * ((posHid) .* (1 - posHid)));
+                    term3 = mean((posHid) .* (1 - posHid));
+                    term4 = normpdf(mean(posHid), obj.rbmParams.sparsityTarget, sqrt(obj.rbmParams.sparsityVariance));
+                    deltaHidBiasReg = obj.rbmParams.sparsityCost * mean(term1) .* term3 .* term4;
+                    deltaWeightReg = obj.rbmParams.sparsityCost * repmat(mean(term1), size(batchData, 2), 1) .* term2 .* repmat(term4, size(batchData, 2), 1);
                 otherwise
                     error('Your sparsity method is not defined');
             end
-            deltaVisBiasReg=0;
-        end %End of getRegularizationGradient function
-        
-    end %End PROTECTED METHODS
-    
-    
-end %End SparseDiscriminativeRBM class
 
+            deltaVisBiasReg = 0;
+        end %End of getRegularizationGradient function
+
+    end %End PROTECTED METHODS
+
+end %End SparseDiscriminativeRBM class

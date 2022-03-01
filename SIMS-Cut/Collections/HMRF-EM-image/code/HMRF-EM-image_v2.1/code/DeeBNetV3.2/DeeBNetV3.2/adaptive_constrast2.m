@@ -1,114 +1,117 @@
-function[ada_edges] = adaptive_constrast2(edges,window_sz,Width,Height)
-%¾àÀëµ±Ç°±ßÖĞµãĞ¡ÓÚµÈÓÚwindow_szµÄ£¬¾Íµ±×÷ÔÚwindowÄÚ£¬
-%Ò»¸öwindowÄÚµ¥¶ÀËãÒ»¸öbeta
-%ÊäÈëedgesÓ¦µ±ÊÇ|I1-I2|^2
+function [ada_edges] = adaptive_constrast2(edges, window_sz, Width, Height)
+    %è·ç¦»å½“å‰è¾¹ä¸­ç‚¹å°äºç­‰äºwindow_szçš„ï¼Œå°±å½“ä½œåœ¨windowå†…ï¼Œ
+    %ä¸€ä¸ªwindowå†…å•ç‹¬ç®—ä¸€ä¸ªbeta
+    %è¾“å…¥edgesåº”å½“æ˜¯|I1-I2|^2
 
-% ÏÈ°Ñedges×ª»¯³ÉÒ»¸öÀ©Õ¹µÄ¾ØÕó£¬È»ºó»ùÓÚÕâ¸ö¾ØÕó×öÖĞÖ°ÂÃ²©
-% extended_mat = zeros(Height+Height-1,Width+Width-1);
-% edges_sz = size(edges,1);
-% for i=1:edges_sz
-%    cur_node1_ind = edges(i,1);
-%     cur_node2_ind = edges(i,2);
-%     [cur_node1_x,cur_node1_y] = ind2ij(cur_node1_ind,Height,Width);
-%     [cur_node2_x,cur_node2_y] = ind2ij(cur_node2_ind,Height,Width);
-%     edge_mid_x = cur_node1_x + cur_node2_x-1;
-%     edge_mid_y = cur_node1_y + cur_node2_y-1;
-%     extended_mat(edge_mid_x,edge_mid_y) = edges(i,4);
-extended_mat = edge2mat(edges,Width,Height);
-% ¶ÔÀ©Õ¹Í¼½øĞĞ¾ùÖµÂÃ²©
-h = fspecial('average',[window_sz,window_sz]);
-B = filter2(h,extended_mat);
-% B = medfilt2(extended_mat,[3,3],'symmetric');
-% ÂË²¨ºóÃ¿¸öµãÊÇÖÜÎ§µãµÄmean£¬µ«ÊÇÖÜÎ§µãÓĞ´óÔ¼Ò»°ëµÄÊÇedge£¬Ê£ÏÂÒ»°ëÊÇnode»òÕß¿Õ
-B = 2*B;
-beta = 1./(4*B);
-%     disp(['sigma:',num2str(sqrt(1/(2*cur_beta)))]);
-%     edges(:,[4,5]) = exp(-beta*edges(:,[4,5]));
-ada_mat = exp(-beta.*extended_mat);
-% ada_edges(i,[4,5]) = exp(-cur_beta*edges(i,[4,5]));
-ada_edges = mat2edge(ada_mat,Width,Height);
-
-
-    
-    
-end
-
-function[extended_mat] = edge2mat(edges,Width,Height)
-extended_mat = zeros(Height+Height-1,Width+Width-1);
-edges_sz = size(edges,1);
-for i=1:edges_sz
-   cur_node1_ind = edges(i,1);
-    cur_node2_ind = edges(i,2);
-    [cur_node1_x,cur_node1_y] = ind2ij(cur_node1_ind,Height,Width);
-    [cur_node2_x,cur_node2_y] = ind2ij(cur_node2_ind,Height,Width);
-    edge_mid_x = cur_node1_x + cur_node2_x-1;
-    edge_mid_y = cur_node1_y + cur_node2_y-1;
-%     if(edge_mid_y>Width+Width-1)
-%        1+1; 
-%     end
-    extended_mat(edge_mid_x,edge_mid_y) = edges(i,4);
-    
-    
-end
+    % å…ˆæŠŠedgesè½¬åŒ–æˆä¸€ä¸ªæ‰©å±•çš„çŸ©é˜µï¼Œç„¶ååŸºäºè¿™ä¸ªçŸ©é˜µåšä¸­èŒæ—…åš
+    % extended_mat = zeros(Height+Height-1,Width+Width-1);
+    % edges_sz = size(edges,1);
+    % for i=1:edges_sz
+    %    cur_node1_ind = edges(i,1);
+    %     cur_node2_ind = edges(i,2);
+    %     [cur_node1_x,cur_node1_y] = ind2ij(cur_node1_ind,Height,Width);
+    %     [cur_node2_x,cur_node2_y] = ind2ij(cur_node2_ind,Height,Width);
+    %     edge_mid_x = cur_node1_x + cur_node2_x-1;
+    %     edge_mid_y = cur_node1_y + cur_node2_y-1;
+    %     extended_mat(edge_mid_x,edge_mid_y) = edges(i,4);
+    extended_mat = edge2mat(edges, Width, Height);
+    % å¯¹æ‰©å±•å›¾è¿›è¡Œå‡å€¼æ—…åš
+    h = fspecial('average', [window_sz, window_sz]);
+    B = filter2(h, extended_mat);
+    % B = medfilt2(extended_mat,[3,3],'symmetric');
+    % æ»¤æ³¢åæ¯ä¸ªç‚¹æ˜¯å‘¨å›´ç‚¹çš„meanï¼Œä½†æ˜¯å‘¨å›´ç‚¹æœ‰å¤§çº¦ä¸€åŠçš„æ˜¯edgeï¼Œå‰©ä¸‹ä¸€åŠæ˜¯nodeæˆ–è€…ç©º
+    B = 2 * B;
+    beta = 1 ./ (4 * B);
+    %     disp(['sigma:',num2str(sqrt(1/(2*cur_beta)))]);
+    %     edges(:,[4,5]) = exp(-beta*edges(:,[4,5]));
+    ada_mat = exp(-beta .* extended_mat);
+    % ada_edges(i,[4,5]) = exp(-cur_beta*edges(i,[4,5]));
+    ada_edges = mat2edge(ada_mat, Width, Height);
 
 end
 
-function[edges] = mat2edge(extended_mat,Width,Height)
-edges = [];
-k = 0;
-for i=1:size(extended_mat,1)
-    
-    for j=1:size(extended_mat,2)
-        if(mod(i+j,2)==1)
-           %ÆæÊıËµÃ÷µ±Ç°µãÊÇedge
-           %Å¼ÊıËµÃ÷µ±Ç°µãÊÇnode»òÕß¿Õ
-           k  =k+1;
-           disp(num2str(k));
-           if(mod(i,2)==1)
-%               Èç¹ûµ±Ç°ĞĞÊÇÆæÊıĞĞ£¬ÄÇÃ´Õâ¸öedgeÊÇºáÏò
-%               ·ñÔòÊÇ×İÏò
-                node1_i = (i+1)/2;
-                node1_j = (j+1+1)/2;
-                node2_i = (i+1)/2;
-                node2_j = (j-1+1)/2;
-                
-           else
-               node1_i = (i+1+1)/2;
-               node1_j = (j+1)/2;
-               node2_i = (i-1+1)/2;
-               node2_j = (j+1)/2;
-           end
-        else
-            continue;
-        end
-%         if(floor(node1_i)~=node1_i)
-%            1+1; 
-%         end
-%         if(floor(node1_j)~=node1_j)
-%            1+1; 
-%         end
-%         if(floor(node2_i)~=node2_i)
-%            1+1; 
-%         end
-%         if(floor(node2_j)~=node2_j)
-%            1+1; 
-%         end
-        
-        node1_ind = ij2ind(node1_i,node1_j,Height,Width);
-        node2_ind = ij2ind(node2_i,node2_j,Height,Width);
-        edges = [edges;node1_ind,node2_ind,0,extended_mat(i,j),extended_mat(i,j),0];
-        
+function [extended_mat] = edge2mat(edges, Width, Height)
+    extended_mat = zeros(Height + Height - 1, Width + Width - 1);
+    edges_sz = size(edges, 1);
+
+    for i = 1:edges_sz
+        cur_node1_ind = edges(i, 1);
+        cur_node2_ind = edges(i, 2);
+        [cur_node1_x, cur_node1_y] = ind2ij(cur_node1_ind, Height, Width);
+        [cur_node2_x, cur_node2_y] = ind2ij(cur_node2_ind, Height, Width);
+        edge_mid_x = cur_node1_x + cur_node2_x - 1;
+        edge_mid_y = cur_node1_y + cur_node2_y - 1;
+        %     if(edge_mid_y>Width+Width-1)
+        %        1+1;
+        %     end
+        extended_mat(edge_mid_x, edge_mid_y) = edges(i, 4);
+
     end
-    
-end
-end
-
-function[ind] = ij2ind(i,j,height,width)
-ind = height*(j-1)+i;
 
 end
 
-function[i,j] = ind2ij(ind,height,width)
-i = mod(ind-1,height)+1;
-j = floor((ind-1)/height)+1;
+function [edges] = mat2edge(extended_mat, Width, Height)
+    edges = [];
+    k = 0;
+
+    for i = 1:size(extended_mat, 1)
+
+        for j = 1:size(extended_mat, 2)
+
+            if (mod(i + j, 2) == 1)
+                %å¥‡æ•°è¯´æ˜å½“å‰ç‚¹æ˜¯edge
+                %å¶æ•°è¯´æ˜å½“å‰ç‚¹æ˜¯nodeæˆ–è€…ç©º
+                k = k + 1;
+                disp(num2str(k));
+
+                if (mod(i, 2) == 1)
+                    %               å¦‚æœå½“å‰è¡Œæ˜¯å¥‡æ•°è¡Œï¼Œé‚£ä¹ˆè¿™ä¸ªedgeæ˜¯æ¨ªå‘
+                    %               å¦åˆ™æ˜¯çºµå‘
+                    node1_i = (i + 1) / 2;
+                    node1_j = (j + 1 + 1) / 2;
+                    node2_i = (i + 1) / 2;
+                    node2_j = (j - 1 + 1) / 2;
+
+                else
+                    node1_i = (i + 1 + 1) / 2;
+                    node1_j = (j + 1) / 2;
+                    node2_i = (i - 1 + 1) / 2;
+                    node2_j = (j + 1) / 2;
+                end
+
+            else
+                continue;
+            end
+
+            %         if(floor(node1_i)~=node1_i)
+            %            1+1;
+            %         end
+            %         if(floor(node1_j)~=node1_j)
+            %            1+1;
+            %         end
+            %         if(floor(node2_i)~=node2_i)
+            %            1+1;
+            %         end
+            %         if(floor(node2_j)~=node2_j)
+            %            1+1;
+            %         end
+
+            node1_ind = ij2ind(node1_i, node1_j, Height, Width);
+            node2_ind = ij2ind(node2_i, node2_j, Height, Width);
+            edges = [edges; node1_ind, node2_ind, 0, extended_mat(i, j), extended_mat(i, j), 0];
+
+        end
+
+    end
+
+end
+
+function [ind] = ij2ind(i, j, height, width)
+    ind = height * (j - 1) + i;
+
+end
+
+function [i, j] = ind2ij(ind, height, width)
+    i = mod(ind - 1, height) + 1;
+    j = floor((ind - 1) / height) + 1;
 end

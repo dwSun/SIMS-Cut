@@ -1,78 +1,88 @@
-function[edges] = get_BK_pairwise(x,mode,Height,Width)
-%edge£ºnumEdge*6µÄ¾ØÕó
-%×¢Òâ£¬ÕâÀïe00ºÍe11£¨Ò²¾ÍÊÇlabelÏàÍ¬µÄÇé¿ö£©£¬È¨ÖØÊÇ0
-%xÊÇÊäÈëÊı¾İ£¬65536*355
-%mode=1: ÓÃµÚÒ»Î¬¼ÆËã£¬eu
-% mode=2£ºÓÃ20Î¬¼ÆËã£¬eu
-%mode=3£ºÓÃ20Î¬¼ÆËã£¬ÄÚ¼±
-weight = 1;
-edges = zeros(Height*(Width-1)*2,6);
-k=1;
-for i=1:Height
-   for j=1:Width
-      disp(num2str(i));
-      if(i+1<=Height)
-          
-         cur_ind = ij2ind(i,j,Height,Width); 
-         nei_ind = ij2ind(i+1,j,Height,Width);
-         cur_x = x(cur_ind,:);
-         nei_x = x(nei_ind,:);
-         if(mode==1)
-             w = (cur_x(1)-nei_x(1))^2;
-         elseif(mode==2)
-             w = pdist([cur_x;nei_x],'euclidean');
-             w = w^2;
-         elseif(mode==3)
-             w = 1;
-         elseif(mode==4)
-             w = (cur_x(1)-nei_x(1))^2;
-    
-    
-         end
-         w = w*weight;
-         edges(k,:)=[nei_ind,cur_ind,0,w,w,0];
-         k = k+1; 
-         
-      end
-      if(j+1<=Width)
-          cur_ind = ij2ind(i,j,Height,Width);
-          nei_ind = ij2ind(i,j+1,Height,Width);
-          cur_x = x(cur_ind,:);
-          nei_x = x(nei_ind,:);
-          if(mode==1)
-              w = (cur_x(1)-nei_x(1))^2;
-          elseif(mode==2)
-              w = pdist([cur_x;nei_x],'euclidean');
-              w = w^2;
-          elseif(mode==3)
-              w = 1;
-          elseif(mode==4)
-              w = (cur_x(1)-nei_x(1))^2;
-    
-          end
-          w = w*weight;
-          edges(k,:)=[nei_ind,cur_ind,0,w,w,0];
-          k = k+1;
-      end
-   end
+function [edges] = get_BK_pairwise(x, mode, Height, Width)
+    %edgeï¼šnumEdge*6çš„çŸ©é˜µ
+    %æ³¨æ„ï¼Œè¿™é‡Œe00å’Œe11ï¼ˆä¹Ÿå°±æ˜¯labelç›¸åŒçš„æƒ…å†µï¼‰ï¼Œæƒé‡æ˜¯0
+    %xæ˜¯è¾“å…¥æ•°æ®ï¼Œ65536*355
+    %mode=1: ç”¨ç¬¬ä¸€ç»´è®¡ç®—ï¼Œeu
+    %mode=2ï¼šç”¨20ç»´è®¡ç®—ï¼Œeu
+    %mode=3ï¼šç”¨20ç»´è®¡ç®—ï¼Œå†…ç§¯
+    weight = 1;
+    edges = zeros(Height * (Width - 1) * 2, 6);
+    k = 1;
+
+    disp(['size of x:', num2str(size(x))]);
+
+    for i = 1:Height
+
+        for j = 1:Width
+
+            if (i + 1 <= Height)
+
+                cur_ind = ij2ind(i, j, Height, Width);
+                nei_ind = ij2ind(i + 1, j, Height, Width);
+                cur_x = x(cur_ind, :);
+                nei_x = x(nei_ind, :);
+
+                if (mode == 1)
+                    w = (cur_x(1) - nei_x(1))^2;
+                elseif (mode == 2)
+                    w = pdist([cur_x; nei_x], 'euclidean');
+                    w = w^2;
+                elseif (mode == 3)
+                    w = 1;
+                elseif (mode == 4)
+                    w = (cur_x(1) - nei_x(1))^2;
+
+                end
+
+                w = w * weight;
+                edges(k, :) = [nei_ind, cur_ind, 0, w, w, 0];
+                k = k + 1;
+
+            end
+
+            if (j + 1 <= Width)
+                cur_ind = ij2ind(i, j, Height, Width);
+                nei_ind = ij2ind(i, j + 1, Height, Width);
+                cur_x = x(cur_ind, :);
+                nei_x = x(nei_ind, :);
+
+                if (mode == 1)
+                    w = (cur_x(1) - nei_x(1))^2;
+                elseif (mode == 2)
+                    w = pdist([cur_x; nei_x], 'euclidean');
+                    w = w^2;
+                elseif (mode == 3)
+                    w = 1;
+                elseif (mode == 4)
+                    w = (cur_x(1) - nei_x(1))^2;
+
+                end
+
+                w = w * weight;
+                edges(k, :) = [nei_ind, cur_ind, 0, w, w, 0];
+                k = k + 1;
+            end
+
+        end
+
+    end
+
+    if (mode == 4 | mode == 3)
+        return;
+    end
+
+    beta = 1 / (2 * mean(edges(:, 4)));
+    disp(['sigma:', num2str(sqrt(1 / (2 * beta)))]);
+    disp(['sigma2:', num2str(sqrt(1 / (beta)))]);
+    edges(:, [4, 5]) = exp(-beta * edges(:, [4, 5]));
 end
 
-if(mode==4 | mode==3)
-   return; 
-end
-beta = 1/(2*mean(edges(:,4)));
-disp(['sigma:',num2str(sqrt(1/(2*beta)))]);
-disp(['sigma2:',num2str(sqrt(1/(beta)))]);
-edges(:,[4,5]) = exp(-beta*edges(:,[4,5]));
-end
-
-
-function[ind] = ij2ind(i,j,height,width)
-ind = height*(j-1)+i;
+function [ind] = ij2ind(i, j, height, width)
+    ind = height * (j - 1) + i;
 
 end
 
-function[i,j] = ind2ij(ind,height,width)
-i = mod(ind-1,height)+1;
-j = floor((ind-1)/height)+1;
+function [i, j] = ind2ij(ind, height, width)
+    i = mod(ind - 1, height) + 1;
+    j = floor((ind - 1) / height) + 1;
 end

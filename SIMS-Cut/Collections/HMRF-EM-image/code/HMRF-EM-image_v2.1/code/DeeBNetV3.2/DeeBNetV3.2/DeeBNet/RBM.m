@@ -22,16 +22,16 @@
 %           AUT(Amirkabir University of Technology), Tehran, Iran
 %**************************************************************************
 %RBM Class
-classdef RBM<handle
-    
+classdef RBM < handle
+
     % PUBLIC PROPERTIES ---------------------------------------------------
-    properties (Access=public)
+    properties (Access = public)
         %Storing RBM parameters
         rbmParams
     end %End PUBLIC PROPERTIES
-    
+
     % PROTECTED PROPERTIES ------------------------------------------------
-    properties (Access=protected)
+    properties (Access = protected)
         %Storing an object of Sampling class
         sampler
         %This parameter is used during training phase for updating weights.
@@ -43,57 +43,62 @@ classdef RBM<handle
         %bias.
         deltaHidBias;
     end %End PROTECTED PROPERTIES
-    
+
     % PUBLIC METHODS ------------------------------------------------------
-    methods (Access=public)
+    methods (Access = public)
         %Constructor
-        function obj=RBM(rbmParams)
-            obj.rbmParams=rbmParams;
-            if(rbmParams.gpu)
+        function obj = RBM(rbmParams)
+            obj.rbmParams = rbmParams;
+
+            if (rbmParams.gpu)
+
                 if (~tools.isoctave())
                     gpuDevice(rbmParams.gpu);
                 else
                     error('Octave does not support GPU.');
                 end
+
             end
+
         end %End of constructor
-        
+
         %Training function
-        function train(obj,trainData)
+        function train(obj, trainData)
             error ('train function must be implement.');
         end
+
         %Get feature from dataMatrix by RBM model
-        function [extractedFeature]=getFeature(obj,dataMatrix)
+        function [extractedFeature] = getFeature(obj, dataMatrix)
             error ('getFeature function must be implement.');
         end
-        
+
         % Transfer gpuArray to local workspace
-        function [obj]=gather(obj)
-            obj.rbmParams=tools.gather(obj.rbmParams);
-            obj.sampler=tools.gather(obj.sampler);
-            obj.deltaWeight=tools.gather(obj.deltaWeight);
-            obj.deltaVisBias=tools.gather(obj.deltaVisBias);
-            obj.deltaHidBias=tools.gather(obj.deltaHidBias);
+        function [obj] = gather(obj)
+            obj.rbmParams = tools.gather(obj.rbmParams);
+            obj.sampler = tools.gather(obj.sampler);
+            obj.deltaWeight = tools.gather(obj.deltaWeight);
+            obj.deltaVisBias = tools.gather(obj.deltaVisBias);
+            obj.deltaHidBias = tools.gather(obj.deltaHidBias);
         end %End of gather function
-        
+
         %Create RBM on GPU
-        function obj=gpuArray(obj)
-            obj.rbmParams.weight=gpuArray(obj.rbmParams.weight);
-            obj.rbmParams.gpu=1;
+        function obj = gpuArray(obj)
+            obj.rbmParams.weight = gpuArray(obj.rbmParams.weight);
+            obj.rbmParams.gpu = 1;
         end %End of gpuArray function
-        
+
     end %End PUBLIC METHODS
-    
+
     % PROTECTED METHODS ---------------------------------------------------
-    methods (Access=protected)
-        
-        function [deltaWeightReg,deltaVisBiasReg,deltaHidBiasReg]=getRegularizationGradient(obj,batchData,posHid)
+    methods (Access = protected)
+
+        function [deltaWeightReg, deltaVisBiasReg, deltaHidBiasReg] = getRegularizationGradient(obj, batchData, posHid)
             %sparsity regularization term
-            deltaWeightReg=0;
-            deltaVisBiasReg=0;
-            deltaHidBiasReg=0;
+            deltaWeightReg = 0;
+            deltaVisBiasReg = 0;
+            deltaHidBiasReg = 0;
         end %End of getRegularizationGradient function
-        
+
     end %End PROTECTED METHODS
-    
+
 end %End RBM class

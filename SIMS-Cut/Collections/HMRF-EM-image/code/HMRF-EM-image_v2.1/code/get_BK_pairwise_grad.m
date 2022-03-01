@@ -1,80 +1,83 @@
-function[edges] = get_BK_pairwise_grad(Width,Height,weight,x,sigma)
-%edge£ºnumEdge*6µÄ¾ØÕó
-%×¢Òâ£¬ÕâÀïe00ºÍe11£¨Ò²¾ÍÊÇlabelÏàÍ¬µÄÇé¿ö£©£¬È¨ÖØÊÇ0
-%xÊÇÊäÈëÊı¾İ£¬65536*355
-% [Gmag, Gdir] = imgradient(I,'prewitt');
-img = reshape(x(:,1),256,256);
-[Gmag, Gdir] = imgradient(img,'prewitt');
-edges = [];
-grad = Gmag(:);
-grad = grad/(max(grad)+1);
-k=0;
-for i=1:Height
-   for j=1:Width
-       k = k+1;
-      if(i+1<=Height)
-          
-         cur_ind = ij2ind(i,j,Height,Width);
-         nei_ind = ij2ind(i+1,j,Height,Width);
-         cur_x = x(cur_ind,:);
-         nei_x = x(nei_ind,:);
-%          w = -log10(abs(1-abs(grad(cur_ind)-grad(nei_ind))/(2*180)));
-% w = 1-min(1,-min(log(1-abs(grad(cur_ind))),log(1-abs(grad(nei_ind)))));
-w = -max(log(abs(grad(cur_ind))),log(abs(grad(nei_ind))));
-% w = -min(log(1-abs(grad(cur_ind))),log(1-abs(grad(nei_ind))));
-         %pdistËã³öÀ´µÄÊÇ1-cosine_similarity
-%          w = exp(-(cur_x(1)-nei_x(1))^2/(2*sigma^2))*1/(pdist([cur_x;nei_x],'euclidean'));
-% w = exp(-(cur_x(1)-nei_x(1))^2/(2*sigma^2));
-%          w = 1-pdist([x(cur_ind,:);x(nei_ind,:)],'cosine');
-         w = w*weight;
-%          if(cur_x(1)>=nei_x(1))
-%              edges = [edges;nei_ind,cur_ind,0,1,w,0]; 
-%          else
-%              edges = [edges;nei_ind,cur_ind,0,w,1,0]; 
-%          end
-         edges = [edges;nei_ind,cur_ind,0,w,w,0]; 
-         
-         
-      end
-      if(j+1<=Width)
-          cur_ind = ij2ind(i,j,Height,Width);
-          nei_ind = ij2ind(i,j+1,Height,Width);
-           cur_x = x(cur_ind,:);
-         nei_x = x(nei_ind,:);
-%           w = exp(-(cur_x(1)-nei_x(1))^2/(2*sigma^2))*1/(pdist([cur_x;nei_x],'euclidean'));
-% w = -log10(abs(1-abs(grad(cur_ind)-grad(nei_ind))/(2*180)));
-% w = 1-min(1,-min(log(1-abs(grad(cur_ind))),log(1-abs(grad(nei_ind)))));
-w = -max(log(abs(grad(cur_ind))),log(abs(grad(nei_ind))));
-% w = -min(log(1-abs(grad(cur_ind))),log(1-abs(grad(nei_ind))));
-% w = exp(-(cur_x(1)-nei_x(1))^2/(2*sigma^2));
-%           w = 1-pdist([x(cur_ind,:);x(nei_ind,:)],'cosine');
-          w = w*weight;
-%           if(cur_x(1)>=nei_x(1))
-%              edges = [edges;nei_ind,cur_ind,0,1,w,0]; 
-%          else
-%              edges = [edges;nei_ind,cur_ind,0,w,1,0]; 
-%          end
-          edges = [edges;nei_ind,cur_ind,0,w,w,0]; 
-      end
-      disp(num2str(k));
-   end
-end
+function [edges] = get_BK_pairwise_grad(Width, Height, weight, x, sigma)
+    %edgeï¼šnumEdge*6çš„çŸ©é˜µ
+    %æ³¨æ„ï¼Œè¿™é‡Œe00å’Œe11ï¼ˆä¹Ÿå°±æ˜¯labelç›¸åŒçš„æƒ…å†µï¼‰ï¼Œæƒé‡æ˜¯0
+    %xæ˜¯è¾“å…¥æ•°æ®ï¼Œ65536*355
+    % [Gmag, Gdir] = imgradient(I,'prewitt');
+    img = reshape(x(:, 1), 256, 256);
+    [Gmag, Gdir] = imgradient(img, 'prewitt');
+    edges = [];
+    grad = Gmag(:);
+    grad = grad / (max(grad) + 1);
+    k = 0;
 
+    for i = 1:Height
 
-sort_w = unique(sort(edges(:,4)));
-max_w = sort_w(end-1);
-edges(edges(:,4)==inf,4)=max_w;
-edges(edges(:,5)==inf,5)=max_w;
+        for j = 1:Width
+            k = k + 1;
 
-end
+            if (i + 1 <= Height)
 
+                cur_ind = ij2ind(i, j, Height, Width);
+                nei_ind = ij2ind(i + 1, j, Height, Width);
+                cur_x = x(cur_ind, :);
+                nei_x = x(nei_ind, :);
+                %          w = -log10(abs(1-abs(grad(cur_ind)-grad(nei_ind))/(2*180)));
+                % w = 1-min(1,-min(log(1-abs(grad(cur_ind))),log(1-abs(grad(nei_ind)))));
+                w = -max(log(abs(grad(cur_ind))), log(abs(grad(nei_ind))));
+                % w = -min(log(1-abs(grad(cur_ind))),log(1-abs(grad(nei_ind))));
+                %pdistç®—å‡ºæ¥çš„æ˜¯1-cosine_similarity
+                %          w = exp(-(cur_x(1)-nei_x(1))^2/(2*sigma^2))*1/(pdist([cur_x;nei_x],'euclidean'));
+                % w = exp(-(cur_x(1)-nei_x(1))^2/(2*sigma^2));
+                %          w = 1-pdist([x(cur_ind,:);x(nei_ind,:)],'cosine');
+                w = w * weight;
+                %          if(cur_x(1)>=nei_x(1))
+                %              edges = [edges;nei_ind,cur_ind,0,1,w,0];
+                %          else
+                %              edges = [edges;nei_ind,cur_ind,0,w,1,0];
+                %          end
+                edges = [edges; nei_ind, cur_ind, 0, w, w, 0];
 
-function[ind] = ij2ind(i,j,height,width)
-ind = height*(j-1)+i;
+            end
+
+            if (j + 1 <= Width)
+                cur_ind = ij2ind(i, j, Height, Width);
+                nei_ind = ij2ind(i, j + 1, Height, Width);
+                cur_x = x(cur_ind, :);
+                nei_x = x(nei_ind, :);
+                %           w = exp(-(cur_x(1)-nei_x(1))^2/(2*sigma^2))*1/(pdist([cur_x;nei_x],'euclidean'));
+                % w = -log10(abs(1-abs(grad(cur_ind)-grad(nei_ind))/(2*180)));
+                % w = 1-min(1,-min(log(1-abs(grad(cur_ind))),log(1-abs(grad(nei_ind)))));
+                w = -max(log(abs(grad(cur_ind))), log(abs(grad(nei_ind))));
+                % w = -min(log(1-abs(grad(cur_ind))),log(1-abs(grad(nei_ind))));
+                % w = exp(-(cur_x(1)-nei_x(1))^2/(2*sigma^2));
+                %           w = 1-pdist([x(cur_ind,:);x(nei_ind,:)],'cosine');
+                w = w * weight;
+                %           if(cur_x(1)>=nei_x(1))
+                %              edges = [edges;nei_ind,cur_ind,0,1,w,0];
+                %          else
+                %              edges = [edges;nei_ind,cur_ind,0,w,1,0];
+                %          end
+                edges = [edges; nei_ind, cur_ind, 0, w, w, 0];
+            end
+
+            disp(num2str(k));
+        end
+
+    end
+
+    sort_w = unique(sort(edges(:, 4)));
+    max_w = sort_w(end - 1);
+    edges(edges(:, 4) == inf, 4) = max_w;
+    edges(edges(:, 5) == inf, 5) = max_w;
 
 end
 
-function[i,j] = ind2ij(ind,height,width)
-i = mod(ind-1,height)+1;
-j = floor((ind-1)/height)+1;
+function [ind] = ij2ind(i, j, height, width)
+    ind = height * (j - 1) + i;
+
+end
+
+function [i, j] = ind2ij(ind, height, width)
+    i = mod(ind - 1, height) + 1;
+    j = floor((ind - 1) / height) + 1;
 end

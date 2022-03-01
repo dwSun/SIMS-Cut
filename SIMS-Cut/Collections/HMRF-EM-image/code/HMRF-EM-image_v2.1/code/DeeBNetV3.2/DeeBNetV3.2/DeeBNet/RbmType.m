@@ -23,13 +23,12 @@
 %RbmType class or enumeration
 classdef RbmType
     % generative: An Rbm that uses data without their labels. Result is a
-    % generative model.    
+    % generative model.
     % discriminative: An Rbm that uses data with their labels. This RBM is a
     % discriminative model and can classify data to their labels.
     properties (Constant)
-      generative=1;
-      discriminative=2;
+        generative = 1;
+        discriminative = 2;
     end
-    
-end %End Classdef
 
+end %End Classdef
