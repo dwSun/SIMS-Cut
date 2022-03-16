@@ -11,24 +11,23 @@ import pickle
 import pandas as pd
 import math
 
+import logging
+
+import tools.logger as logger
+
+
+trace = logger.trace
+log = logging.getLogger()
+
+
 # import pyfpgrowth
 import operator
 import numpy as np
 from scipy.io import savemat
 from scipy.stats import pearsonr
 
-# FILE_PATH = '../Yuanzhiyuan/sample2/'
-# for file in os.listdir(FILE_PATH):
-# 	idx_former = file.find('-',15)
-# 	idx_latter = file.find('u',15)
-# 	# print file[idx_former+2:idx_latter-1]
-# 	# print file
-# 	print FILE_PATH+file
-# 	print FILE_PATH+file[idx_former+2:idx_latter-1]
-# 	os.rename(FILE_PATH+file,FILE_PATH+file[idx_former+2:idx_latter-1])
-# 	# print file[idx+1:]
 
-
+@trace()
 def matter_filter(threshold, path):
     # find matter whose heatmap has more none-zero pixels.
     matter_pixel_dict = get_matter_pixel_dict(path)
@@ -39,6 +38,7 @@ def matter_filter(threshold, path):
     return sorted_dict
 
 
+@trace()
 def get_matter_pixel_dict(path):
     matter_pixel_dict = {}
     for filename in os.listdir(path):
@@ -53,6 +53,7 @@ def get_matter_pixel_dict(path):
     return matter_pixel_dict
 
 
+@trace()
 def get_pixel_list_from_file(filename):
     pixel_list = []
     f = open(filename, "r")
@@ -64,6 +65,7 @@ def get_pixel_list_from_file(filename):
     return pixel_list
 
 
+@trace()
 def renamer(path):
     # print 'bb'
     for filename in os.listdir(path):
@@ -84,6 +86,7 @@ def renamer(path):
         os.rename(originam_filename, changed_filename)
 
 
+@trace()
 def find_cooccorance_matters(matter_li):
     DEs = [1, 5, 6, 7, 8, 9, 10]
     DSs = range(5, 16)
@@ -108,6 +111,7 @@ def find_cooccorance_matters(matter_li):
     return filtered_matters
 
 
+@trace()
 def get_matter_list_from_path(path):
     matter_list = []
     for file in os.listdir(path):
@@ -118,6 +122,7 @@ def get_matter_list_from_path(path):
     return sorted(matter_list)
 
 
+@trace()
 def find_cooccorance_matters1(path1, path2):
     common_matter_list = []
     # for path in path_list:
@@ -132,6 +137,7 @@ def find_cooccorance_matters1(path1, path2):
 
 
 # 读取质谱仪文本数据并存储为 matlab 格式
+@trace()
 def get_samples(rawdata_path, matters_candidate, tosave_path, ptype=None, sz=256):
     rst_sample = []
     for matter in matters_candidate:
@@ -158,7 +164,9 @@ def get_samples(rawdata_path, matters_candidate, tosave_path, ptype=None, sz=256
     # print(rst_sample.shape)
 
 
+@trace()
 def listmatter_top_k_corr(test_samples, matters_candidate, A_matter, top_k):
+    log.debug("get top {0} correlation matters with {1}...".format(top_k, A_matter))
     cor_array = np.zeros(shape=(len(matters_candidate)))
     A_matter = float(A_matter)
     top_k = int(top_k)
@@ -176,6 +184,7 @@ def listmatter_top_k_corr(test_samples, matters_candidate, A_matter, top_k):
     return rst_matter, rst_corr
 
 
+@trace()
 def listmatter(path):
     li = []
     for filename in os.listdir(path):
@@ -194,4 +203,5 @@ def listmatter(path):
         matter = float(matter)
         li.append(matter)
     li = sorted(li)
+    log.debug("matters:[{}]".format(li))
     return li

@@ -7,9 +7,17 @@ from tools.SIMSCut_preprocess import SIMSCut_preprocess
 import shutil
 import time
 import os.path as osp
+import logging
 
 from tools.preprocess import renamer
 
+
+from tools import logger
+
+logger.init(console=True)
+
+trace = logger.trace
+log = logging.getLogger()
 
 import config
 
@@ -98,4 +106,4 @@ matlab_code = matlab_code_comp + matlab_code_temp
 with open(matlab_script_name, "w") as f:
     f.write(matlab_code)
 
-print("script [{}]".format(matlab_script_name))
+log.debug("script [{}]".format(matlab_script_name))
