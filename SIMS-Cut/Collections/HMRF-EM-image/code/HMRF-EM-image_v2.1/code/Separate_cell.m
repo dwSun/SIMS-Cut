@@ -37,7 +37,7 @@ function [separated_img] = Separate_cell(img)
     img_bin = zeros(sz1, sz2);
     img_bin(img == 1) = 0;
     img_bin(img == 2) = 1;
-    cc = bwconncomp(img_bin);
+    cc = bwconncomp(img_bin); % 找出图像中的联通区域
     separated_img = zeros(sz1, sz2);
 
     for i = 1:cc.NumObjects

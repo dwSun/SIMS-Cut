@@ -44,8 +44,13 @@ os.chdir(config.process_data_path)
 def preprecess_data(process_data_path, matlab_info, dataname, A_matter, top_k, rename, divn, epoch, rbm_ratio, sz, ptype, ext):
     data_name, n_matter = SIMSCut_preprocess(dataname, A_matter, ptype, top_k, rename, sz)
     src = osp.join(process_data_path, "process", data_name)
-    dist = osp.join(process_data_path, "process", data_name) + ext
-    shutil.copytree(src, dist)
+    dest = osp.join(process_data_path, "process", data_name) + ext
+    if not osp.exists(src) or osp.exists(dest):
+        log.error("check if [src] exist or [dest] not exist!!")
+        os._exit(0)
+
+    shutil.copytree(src, dest)
+    log.debug("copy from [{}] to [{}]".format(src, dest))
     matlab_info["name_list"].append(data_name + ext)
     matlab_info["nei_type"].append(4)
     matlab_info["edge_type_list"].append("ada")
@@ -69,6 +74,7 @@ for i in range(len(config.dataname_list)):
 
     for ptype in config.ptype_list:
         for ext in ["_ada", "_auto"]:
+            # 这里 ada 和 auto 主要是用于 matlab 里面处理的不同，跟 python 的代码没有关系。
             preprecess_data(config.process_data_path, matlab_info, dataname, A_matter, top_k, rename, divn, epoch, rbm_ratio, sz, ptype, ext)
 
 

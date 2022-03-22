@@ -8,6 +8,7 @@ function [filtered_img, num_valid_cell, filtered_labeling] = filter_cell_ext(cur
     to_discard = [];
     num_valid_cell = num_cells;
 
+    % FIXME 只有一个像素，周边没有关联像素的cell，会被删除？
     for i = 1:num_cells
         idx_vector = find(separated_img == i);
 
