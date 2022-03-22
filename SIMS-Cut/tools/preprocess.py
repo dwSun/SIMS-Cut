@@ -56,12 +56,11 @@ def get_matter_pixel_dict(path):
 @trace()
 def get_pixel_list_from_file(filename):
     pixel_list = []
-    f = open(filename, "r")
-    lines = f.readlines()[9:]
-    for line in lines:
-        intensity = float(line.split(" ")[2])
-        pixel_list.append(intensity)
-    f.close()
+    with open(filename, "r") as inf:
+        lines = inf.readlines()[9:]
+        for line in lines:
+            intensity = float(line.split(" ")[2])
+            pixel_list.append(intensity)
     return pixel_list
 
 
@@ -76,13 +75,13 @@ def renamer(path):
         idx_former = filename.rfind("-")
         idx_latter = filename.rfind("txt")
         # print idx_former,idx_latter
-        print(filename[idx_former + 2 : idx_latter - 3])
+        log.debug(filename[idx_former + 2 : idx_latter - 3])
 
-        print(filename)
+        log.debug(filename)
         matter = filename[idx_former + 2 : idx_latter - 3].strip()
         originam_filename = osp.join(path, filename)
         changed_filename = osp.join(path, matter + ".txt")
-        print("change {o} to {c}".format(o=filename, c=matter))
+        log.debug("change {o} to {c}".format(o=filename, c=matter))
         os.rename(originam_filename, changed_filename)
 
 
@@ -138,46 +137,60 @@ def find_cooccorance_matters1(path1, path2):
 
 # 读取质谱仪文本数据并存储为 matlab 格式
 @trace()
-def get_samples(rawdata_path, matters_candidate, tosave_path, ptype=None, sz=256):
+def get_samples(rawdata_path, matters_candidate, tosave_path, ptype=None, sz=[256, 256]):
     rst_sample = []
     for matter in matters_candidate:
         matter = "{0:.2f}".format(matter)
 
         cur_file = osp.join(rawdata_path, matter + ".txt")
-        cur_matter_pd = pd.read_csv(open(cur_file, "r"), sep=" ", skiprows=9, header=None, names=["row", "col", "val"])
+        with open(cur_file, "r") as inf:
+            cur_matter_pd = pd.read_csv(inf, sep=" ", skiprows=9, header=None, names=["row", "col", "val"])
 
         cur_matter_data = np.array(cur_matter_pd["val"])
+        # log.debug(cur_matter_data.shape)
         rst_sample.append(cur_matter_data)
     rst_sample = np.array(rst_sample)
+    log.debug(rst_sample.shape)
     rst_sample = np.transpose(rst_sample)
+    log.debug(rst_sample.shape)
     if ptype == "magic":
         rst_sample = magic.MAGIC().fit_transform(rst_sample)
-    if ptype == "gaussian":
 
+    if ptype == "gaussian":
         for i in range(rst_sample.shape[1]):
             cur_col = rst_sample[:, i]
             cur_img = cur_col.reshape(sz[0], sz[1])
             cur_img_blur = gaussian_filter(cur_img, 1)
             rst_sample[:, i] = cur_img_blur.reshape((sz[0] * sz[1],))
+    # 输出的数据尺寸是 [size * size, len(matters_candidate)]
+    # 所以每一列是一个质峰
+    save_path = osp.join(tosave_path, "samples.mat")
     savemat(file_name=tosave_path + "test_samples_{num_features}.mat".format(num_features=len(matters_candidate)), mdict={"test_samples": rst_sample})
     return rst_sample
-    # print(rst_sample.shape)
 
 
 @trace()
 def listmatter_top_k_corr(test_samples, matters_candidate, A_matter, top_k):
-    log.debug("get top {0} correlation matters with {1}...".format(top_k, A_matter))
+    log.debug("get top [{0}] correlation matters with [{1}]...".format(top_k, A_matter))
     cor_array = np.zeros(shape=(len(matters_candidate)))
     A_matter = float(A_matter)
     top_k = int(top_k)
+    # 这里的 134 就是研究者认为与细胞核最相关的质峰
     data_134 = test_samples[:, matters_candidate.index(A_matter)]
-    count = 0
     for i in range(len(matters_candidate)):
-        count += 1
         [a, b] = pearsonr(data_134, test_samples[:, i])
         cor_array[i] = float(a)
+
+    # log.debug(cor_array)
+
     sorted_idx = np.flip(np.argsort(cor_array), axis=0)
     sorted_cors = np.flip(np.sort(cor_array), axis=0)
+
+    """
+    log.debug(sorted_idx)
+    log.debug(sorted_cors)
+    """
+
     matters_candidate_np = np.array(matters_candidate)
     rst_matter = matters_candidate_np[sorted_idx[:top_k]]
     rst_corr = sorted_cors[:top_k]
@@ -203,5 +216,7 @@ def listmatter(path):
         matter = float(matter)
         li.append(matter)
     li = sorted(li)
-    log.debug("matters:[{}]".format(li))
+
+    # log.debug("matters:[{}]".format(li))
+
     return li
