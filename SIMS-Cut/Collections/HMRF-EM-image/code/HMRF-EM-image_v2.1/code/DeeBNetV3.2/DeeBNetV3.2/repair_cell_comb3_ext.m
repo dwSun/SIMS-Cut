@@ -13,8 +13,8 @@
 
 % big
 %path = '/home/dl/dwSun/数字化病理/sample_data/process/HCC-05-T-big_gaussian_ada/cut/EM_mid_rst/';
-%file_prefix = 'cur_labeling_203554659_test_sample_ada_test_20_Fmeasure_0.5_div20__';
-%sz = [256 256];
+%file_prefix = 'cur_labeling_094637326_test_sample_ada_test_20_Fmeasure_0.5_div20__';
+%sz = [1792 512];
 %load('/home/dl/dwSun/数字化病理/sample_data/process/HCC-05-T-big_gaussian_ada/preprocess/test_samples_20.mat');
 %save_final_labeling_path = '/home/dl/dwSun/数字化病理/sample_data/process/HCC-05-T-big_gaussian_ada/cut/rst/';
 %beta = 0.5;
@@ -46,6 +46,8 @@ attention_threshold = 40;
 labeling_mat = zeros(height * width, iters_num);
 % 构建labeling_mat，并看哪个图的cell最多
 
+all_cells_num = 0;
+
 for i = 1:iters_num
     disp(['filter: ', num2str(i)]);
     cur_file = [path, file_prefix, num2str(i), file_sufix];
@@ -54,7 +56,10 @@ for i = 1:iters_num
     [filtered_img, num_valid_cell, filtered_labeling] = filter_cell_ext(cur_labeling, 0, sz);
     img = reshape(filtered_labeling, sz(1), sz(2));
     [separated_img] = Separate_cell(img);
+    % 记下来一共有多少个细胞，最大也就是这么多
+
     labeling_mat(:, i) = separated_img(:);
+    all_cells_num = all_cells_num + max(labeling_mat(:, i));
     % 这里有一个隐式的reshape，separated_img 是一个二维图像，labeling_mat是一个一维的
 
 end
@@ -63,13 +68,21 @@ labeling_mat = labeling_mat(:, 2:end);
 % FIXME 这里排除了 第一个 kmeans 生成的 结果，why?
 
 disp('filter done')
+
 %第i个位置表示i号节点的父节点的idx,1号节点是全1
-parent_list = [0];
+parent_list = zeros(1, all_cells_num);
 %记录第i个节点属于哪一层，第1层是labeling_1
-level_list = [0];
+level_list = zeros(1, all_cells_num);
 %记录第i个节点是那一层的几号细胞
-cell_list = [1];
-area_list = [sz(1) * sz(2)]; % 每个细胞的像素数
+cell_list = zeros(1, all_cells_num);
+area_list = zeros(1, all_cells_num);; % 每个细胞的像素数
+
+cell_idx = 1;
+
+parent_list(cell_idx) = 0;
+level_list(cell_idx) = 0;
+cell_list(cell_idx) = 1;
+area_list(cell_idx) = sz(1) * sz(2);
 
 lost_number = 0;
 iters_num = iters_num - 1;
@@ -84,43 +97,39 @@ for i = 1:iters_num
     if (i == 1)
 
         for j = 1:num_cells
-            parent_list = [parent_list, 1];
-            level_list = [level_list, 1];
-            cell_list = [cell_list, j];
-            area_list = [area_list, sum(cur_labeling == j)];
+            cell_idx = cell_idx + 1;
+            parent_list(cell_idx) = 1;
+            level_list(cell_idx) = 1;
+            cell_list(cell_idx) = j;
+            area_list(cell_idx) = sum(cur_labeling == j);
         end
 
         continue;
     end
 
+    % [size x size, 1]
     pre_labeling = labeling_mat(:, i - 1);
-    pre_idxs = (length(parent_list) - max(pre_labeling) + 1 + pre_lost):length(parent_list);
+    % [1, num_cells_with_father]
+    pre_idxs = (cell_idx - max(pre_labeling) + 1 + pre_lost):cell_idx;
 
-    pre_cells = cell_list(pre_idxs);
     pre_lost = 0;
+    tt = cur_labeling == (1:num_cells);
 
     for j = 1:num_cells
         %把新来的节点的父节点记录下来
         flag = 1;
+        cur_labeling_j = tt(:, j);
 
-        % 向量化所有计算，提高效率
-        cur_labeling_j = cur_labeling == j;
-        cur_labeling_j_area = sum(cur_labeling_j);
+        for k = pre_idxs
 
-        % 1xlen(pre_idxs)
-
-        bool_idx = any(cur_labeling_j & (pre_labeling == cell_list(pre_idxs)));
-
-        for k_i = 1:length(pre_idxs)
-
-            if bool_idx(k_i)
-                k = pre_idxs(k_i);
+            if any(cur_labeling_j & (pre_labeling == cell_list(k)))
 
                 %说明两层这两个segment有重叠
-                parent_list = [parent_list, k];
-                level_list = [level_list, i];
-                cell_list = [cell_list, j];
-                area_list = [area_list, cur_labeling_j_area];
+                cell_idx = cell_idx + 1;
+                parent_list(cell_idx) = k;
+                level_list(cell_idx) = i;
+                cell_list(cell_idx) = j;
+                area_list(cell_idx) = sum(cur_labeling_j);
 
                 flag = 0;
                 break;
@@ -142,6 +151,11 @@ for i = 1:iters_num
     end
 
 end
+
+parent_list = parent_list(1:cell_idx);
+level_list = level_list(1:cell_idx);
+cell_list = cell_list(1:cell_idx);
+area_list = area_list(1:cell_idx);
 
 %找出所有的叶子节点，并赋给final_labeling
 parent_set = unique(parent_list);
