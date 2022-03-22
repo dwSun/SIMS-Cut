@@ -53,7 +53,7 @@ def preprecess_data(process_data_path, matlab_info, dataname, A_matter, top_k, r
     log.debug("copy from [{}] to [{}]".format(src, dest))
     matlab_info["name_list"].append(data_name + ext)
     matlab_info["nei_type"].append(4)
-    matlab_info["edge_type_list"].append("ada")
+    matlab_info["edge_type_list"].append(ext)
     matlab_info["test_sample_all_file_list"].append("test_samples_{n_matter}.mat".format(n_matter=n_matter))
     matlab_info["top_k_name_list"].append("test_samples_{0}".format(top_k))
     matlab_info["divn_list"].append(divn)
