@@ -90,9 +90,9 @@ iters_num = iters_num - 1;
 pre_lost = 0;
 
 for i = 1:iters_num
-    disp(['loop2', ':', num2str(i)])
     cur_labeling = labeling_mat(:, i);
     num_cells = max(cur_labeling);
+    disp(['loop2', ':', num2str(i), ':', num2str(num_cells)])
 
     if (i == 1)
 
@@ -107,29 +107,49 @@ for i = 1:iters_num
         continue;
     end
 
+    %tic
     % [size x size, 1]
     pre_labeling = labeling_mat(:, i - 1);
     % [1, num_cells_with_father]
     pre_idxs = (cell_idx - max(pre_labeling) + 1 + pre_lost):cell_idx;
 
     pre_lost = 0;
-    tt = cur_labeling == (1:num_cells);
+    % 使用元胞，尽量避免大数组的索引
+    tt = {};
+    sum_tt = {};
+    pre_labeling_mat = {};
+
+    pre_cells = cell_list((cell_idx - max(pre_labeling) + 1 + pre_lost):cell_idx);
 
     for j = 1:num_cells
         %把新来的节点的父节点记录下来
         flag = 1;
-        cur_labeling_j = tt(:, j);
 
-        for k = pre_idxs
+        if length(tt) < j
+            tt{j} = cur_labeling == j;
+        end
 
-            if any(cur_labeling_j & (pre_labeling == cell_list(k)))
+        for k_i = 1:length(pre_idxs)
+
+            k = pre_idxs(k_i);
+
+            if length(pre_labeling_mat) < k_i
+                pre_labeling_mat{k_i} = pre_labeling == pre_cells(k_i);
+            end
+
+            if any(tt{j} & pre_labeling_mat{k_i})
 
                 %说明两层这两个segment有重叠
                 cell_idx = cell_idx + 1;
                 parent_list(cell_idx) = k;
                 level_list(cell_idx) = i;
                 cell_list(cell_idx) = j;
-                area_list(cell_idx) = sum(cur_labeling_j);
+
+                if length(sum_tt) < j || sum_tt{j} == 0
+                    sum_tt{j} = sum(tt{j});
+                end
+
+                area_list(cell_idx) = sum_tt{j};
 
                 flag = 0;
                 break;
@@ -149,6 +169,8 @@ for i = 1:iters_num
         end
 
     end
+
+    %toc
 
 end
 
