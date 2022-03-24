@@ -23,7 +23,7 @@ log = logging.getLogger()
 # import pyfpgrowth
 import operator
 import numpy as np
-from scipy.io import savemat
+from hdf5storage import savemat
 from scipy.stats import pearsonr
 
 
@@ -165,10 +165,12 @@ def get_samples(rawdata_path, matters_candidate, tosave_path, ptype=None, sz=[25
     # 输出的数据尺寸是 [size * size, len(matters_candidate)]
     # 所以每一列是一个质峰
     save_path = osp.join(tosave_path, "samples.mat")
+
     savemat(
-        file_name=tosave_path + "test_samples_{num_features}.mat".format(num_features=len(matters_candidate)),
-        mdict={"test_samples": rst_sample},
-        do_compression=True,
+        tosave_path + "test_samples_{num_features}.mat".format(num_features=len(matters_candidate)),
+        {"test_samples": rst_sample},
+        format="7.3",
+        matlab_compatible=True,
     )
     return rst_sample
 
