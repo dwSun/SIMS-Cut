@@ -1,13 +1,21 @@
 % 276维，前两维是 Br和I
 %BR和I放在datamat的最后两位
 
-label_path = 'labeling\';
-% data_file={
-% 'C:\Users\yzy\Documents\SIMS\MATLAB\MATLAB\Add-Ons\Collections\HMRF-EM-image\code\HMRF-EM-image_v2.1\code\DeeBNetV3.2\DeeBNetV3.2\data\hunyang\MIX-BRDU_all.mat'
-% }
-% label_file = {
-% 'C:\Users\yzy\Documents\SIMS\MATLAB\MATLAB\Add-Ons\Collections\HMRF-EM-image\code\HMRF-EM-image_v2.1\code\DeeBNetV3.2\DeeBNetV3.2\data\hunyang\中间结果\MIX-BRDU_0724_labeling.mat'
-% }
+%label_path = 'labeling\';
+
+% test code
+%save_final_labeling_path = '/home/dl/dwSun/数字化病理/sample_data/process/HCC-05-T-big_gaussian_ada/cut/rst/';
+%data_file = {
+%        '/home/dl/dwSun/数字化病理/sample_data/process/HCC-05-T-big_gaussian_ada/preprocess/test_samples_320.mat'
+%        };
+%label_file = {
+%        '/home/dl/dwSun/数字化病理/sample_data/process/HCC-05-T-big_gaussian_ada/cut/rst/final_labeling_0.5.mat'
+%        };
+
+%beta = 0.5;
+%idx = 1;
+%sz = [1792 512];
+% test code end
 
 data_mat = [];
 data_mat_cell = cell(0);
@@ -38,3 +46,9 @@ for i = 1:idx
 end
 
 data_mat = vertcat(data_mat_cell{:});
+
+% test code
+
+%save(fullfile(save_final_labeling_path, strcat('datamat_', num2str(beta), '.mat')), 'data_mat', '-v7.3');
+
+% test code end
