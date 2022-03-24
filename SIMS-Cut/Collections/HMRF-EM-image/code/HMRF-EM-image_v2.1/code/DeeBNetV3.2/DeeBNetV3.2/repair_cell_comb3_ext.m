@@ -26,18 +26,6 @@ file_sufix = '.mat';
 iters_max = 200;
 iters_num = 0;
 
-for i = 1:iters_max
-    % 这里要处理的数据，就是上一个步骤，那一堆 rbm 输出的 label，1为背景，2为细胞
-    cur_file = strcat(path, file_prefix, num2str(i), file_sufix);
-
-    if exist(cur_file, 'file')
-        disp(cur_file)
-        iters_num = i;
-    end
-
-end
-
-disp(num2str(iters_num));
 height = sz(1);
 fold_mean = 1.00;
 width = sz(2);
@@ -48,12 +36,26 @@ labeling_mat = zeros(height * width, iters_num);
 
 all_cells_num = 0;
 
-for i = 1:iters_num
-    disp(['filter: ', num2str(i)]);
-    cur_file = [path, file_prefix, num2str(i), file_sufix];
-    load(cur_file);
+for i = 1:iters_max
+    % 这里要处理的数据，就是上一个步骤，那一堆 rbm 输出的 label，1为背景，2为细胞
+    cur_file = strcat(path, file_prefix, num2str(i), file_sufix);
 
-    [filtered_img, num_valid_cell, filtered_labeling] = filter_cell_ext(cur_labeling, 0, sz);
+    if exist(cur_file, 'file')
+        iters_num = i;
+
+        cur_file = [path, file_prefix, num2str(i), file_sufix];
+        disp(['load: ', cur_file]);
+        load(cur_file);
+
+        labeling_mat(:, i) = cur_labeling;
+    end
+
+end
+
+parfor i = 1:iters_num
+    disp(['filter: ', num2str(i)]);
+
+    [filtered_img, num_valid_cell, filtered_labeling] = filter_cell_ext(labeling_mat(:, i), 0, sz);
     img = reshape(filtered_labeling, sz(1), sz(2));
     [separated_img] = Separate_cell(img);
     % 记下来一共有多少个细胞，最大也就是这么多
