@@ -78,11 +78,11 @@ function [] = run_zuzhi_func_go_choose_adaauto_ext(process_path, test_sample_all
         label_file{idx} = strcat(save_final_labeling_path, 'final_labeling_', num2str(beta), '.mat');
 
         collect_pixel_data_1208zuzhi_ext;
-        save(fullfile(save_final_labeling_path, strcat('datamat_', num2str(beta), '.mat')), 'data_mat');
+        save(fullfile(save_final_labeling_path, strcat('datamat_', num2str(beta), '.mat')), 'data_mat', '-v7.3');
     end
 
     %idx=length(beta_list);
     disp(['idx', num2str(idx)])
     collect_pixel_data_1208zuzhi;
     disp(['idx', num2str(idx)])
-    save(fullfile(save_final_labeling_path, strcat(date, '_datamat_', test_sample_all_file_simple)), 'data_mat')
+    save(fullfile(save_final_labeling_path, strcat(date, '_datamat_', test_sample_all_file_simple)), 'data_mat', '-v7.3');
