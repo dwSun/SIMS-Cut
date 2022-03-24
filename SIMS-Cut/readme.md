@@ -14,3 +14,12 @@ python SIMSCutpipe.py
 ```
 
 > 注意，运行该命令之后，会在 process_data_path 目录下生成 process 目录。请确保运行该代码之前 process 目录不存在，不然上述代码会报错。
+
+# Matlab 代码运行环境配置
+
+Matlab R2019B 及以上版本
+需要安装的组件：
+MATLAB
+Image Processing Toolbox
+Statistics and Machine Learning Toolbox
+Parallel Computing Toolbox
