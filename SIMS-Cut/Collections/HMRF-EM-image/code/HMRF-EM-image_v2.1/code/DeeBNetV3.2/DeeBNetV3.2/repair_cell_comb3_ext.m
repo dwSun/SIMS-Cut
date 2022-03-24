@@ -58,9 +58,10 @@ parfor i = 1:iters_num
     [filtered_img, num_valid_cell, filtered_labeling] = filter_cell_ext(labeling_mat(:, i), 0, sz);
     img = reshape(filtered_labeling, sz(1), sz(2));
     [separated_img] = Separate_cell(img);
-    % 记下来一共有多少个细胞，最大也就是这么多
 
     labeling_mat(:, i) = separated_img(:);
+
+    % 记下来一共有多少个细胞，最大也就是这么多
     all_cells_num = all_cells_num + max(labeling_mat(:, i));
     % 这里有一个隐式的reshape，separated_img 是一个二维图像，labeling_mat是一个一维的
 
@@ -71,11 +72,12 @@ labeling_mat = labeling_mat(:, 2:end);
 
 disp('filter done')
 
+% 数组全部预申请内存，避免大量内存的拼接，提高效率
 %第i个位置表示i号节点的父节点的idx,1号节点是全1
 parent_list = zeros(1, all_cells_num);
-%记录第i个节点属于哪一层，第1层是labeling_1
+%记录第i个节点属于哪一层，第1层是labeling_1，这里的层就是 rbm 的每次迭代
 level_list = zeros(1, all_cells_num);
-%记录第i个节点是那一层的几号细胞
+%记录第i个节点是那一层的几号细胞，
 cell_list = zeros(1, all_cells_num);
 area_list = zeros(1, all_cells_num);; % 每个细胞的像素数
 
@@ -109,54 +111,55 @@ for i = 1:iters_num
         continue;
     end
 
+    % 使用稀疏矩阵，最大程度的减少内存使用量
     %tic
     % [size x size, 1]
     pre_labeling = labeling_mat(:, i - 1);
     % [1, num_cells_with_father]
     pre_idxs = (cell_idx - max(pre_labeling) + 1 + pre_lost):cell_idx;
+    pre_cells = cell_list((cell_idx - max(pre_labeling) + 1 + pre_lost):cell_idx);
 
     pre_lost = 0;
-    % 使用元胞，尽量避免大数组的索引
-    tt = {};
-    sum_tt = {};
-    pre_labeling_mat = {};
+    % [size x size, num_cells]
+    cur_labeling_mat = sparse(cur_labeling == 1:num_cells);
+    sum_cur_labeling_mat = zeros(num_cells);
 
-    pre_cells = cell_list((cell_idx - max(pre_labeling) + 1 + pre_lost):cell_idx);
+    % 这里记录了上一层父细胞的位置，位置都由 1 填充，每一层一个细胞
+    % [size x size, num_cells_with_father]
+    pre_labeling_mat = sparse(pre_labeling == pre_cells);
+    % 这里把1替换成父细胞的索引
+    pre_labeling_mat = sparse(pre_labeling_mat .* pre_idxs);
+    % 细胞没有重叠，所以可以直接把所有层都压缩到一层，减少计算量
+    pre_labeling_mat = sum(pre_labeling_mat, 2);
 
     for j = 1:num_cells
         %把新来的节点的父节点记录下来
         flag = 1;
 
-        if length(tt) < j
-            tt{j} = cur_labeling == j;
+        k = unique(cur_labeling_mat(:, j) .* pre_labeling_mat);
+
+        if length(k) > 2
+            % 好奇，有没有超过2个父节点的细胞？
+            disp(['loop2 basterd:', num2str(i), ':', num2str(j), ':', k])
+
         end
 
-        for k_i = 1:length(pre_idxs)
+        if length(k) > 1
+            k = k(2);
 
-            k = pre_idxs(k_i);
+            %说明两层这两个segment有重叠
+            cell_idx = cell_idx + 1;
+            parent_list(cell_idx) = k;
+            level_list(cell_idx) = i;
+            cell_list(cell_idx) = j;
 
-            if length(pre_labeling_mat) < k_i
-                pre_labeling_mat{k_i} = pre_labeling == pre_cells(k_i);
+            if sum_cur_labeling_mat(j) == 0
+                sum_cur_labeling_mat(j) = sum(cur_labeling_mat(:, j));
             end
 
-            if any(tt{j} & pre_labeling_mat{k_i})
+            area_list(cell_idx) = sum_cur_labeling_mat(j);
 
-                %说明两层这两个segment有重叠
-                cell_idx = cell_idx + 1;
-                parent_list(cell_idx) = k;
-                level_list(cell_idx) = i;
-                cell_list(cell_idx) = j;
-
-                if length(sum_tt) < j || sum_tt{j} == 0
-                    sum_tt{j} = sum(tt{j});
-                end
-
-                area_list(cell_idx) = sum_tt{j};
-
-                flag = 0;
-                break;
-
-            end
+            flag = 0;
 
         end
 
@@ -182,9 +185,11 @@ cell_list = cell_list(1:cell_idx);
 area_list = area_list(1:cell_idx);
 
 %找出所有的叶子节点，并赋给final_labeling
+
 parent_set = unique(parent_list);
 all_set = 1:length(parent_list);
 leaf_set = setdiff(all_set, parent_set);
+% 不在父节点的节点，就是叶子节点
 
 mean_leaf_area = median(area_list(leaf_set));
 area_threshold = fold_mean * mean_leaf_area;
