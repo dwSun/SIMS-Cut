@@ -42,9 +42,8 @@ os.chdir(config.process_data_path)
 
 
 @trace()
-def preprecess_data(process_data_path, matlab_info, dataname, A_matter, top_k, rename, divn, epoch, rbm_ratio, sz, ptype, ext):
-
-    data_name, n_matter = SIMSCut_preprocess(dataname, A_matter, ptype, top_k, rename, sz)
+def preprecess_data(process_data_path, matlab_info, dataname, A_matter, top_k, rename, divn, epoch, rbm_ratio, ptype, ext, sz=None):
+    data_name, n_matter, sz = SIMSCut_preprocess(dataname, A_matter, ptype, top_k, rename, sz)
 
     src = osp.join(process_data_path, "process", data_name)
     dest = osp.join(process_data_path, "process", data_name) + ext
@@ -58,7 +57,7 @@ def preprecess_data(process_data_path, matlab_info, dataname, A_matter, top_k, r
 
     matlab_info["name_list"].append(data_name + ext)
     matlab_info["nei_type"].append(4)
-    matlab_info["edge_type_list"].append(ext)
+    matlab_info["edge_type_list"].append(ext[1:])
     matlab_info["test_sample_all_file_list"].append("test_samples_{n_matter}.mat".format(n_matter=n_matter))
     matlab_info["top_k_name_list"].append("test_samples_{0}".format(top_k))
     matlab_info["divn_list"].append(divn)
@@ -75,13 +74,16 @@ for i in range(len(config.dataname_list)):
     divn = config.divn_list[i]
     epoch = config.epoch_list[i]
     rbm_ratio = config.rbm_ratio_list[i]
-    sz = config.sz_list[i]
+    if len(config.sz_list) == 0:
+        sz = None
+    else:
+        sz = config.sz_list[i]
 
     for ptype in config.ptype_list:
         for ext in ["_ada", "_auto"]:
             # 这里 ada 和 auto 主要是用于 matlab 里面处理的不同，跟 python 的代码没有关系。
             log.debug("#" * 10)
-            preprecess_data(config.process_data_path, matlab_info, dataname, A_matter, top_k, rename, divn, epoch, rbm_ratio, sz, ptype, ext)
+            preprecess_data(config.process_data_path, matlab_info, dataname, A_matter, top_k, rename, divn, epoch, rbm_ratio, ptype, ext, sz)
 
 
 matlab_code_temp = (

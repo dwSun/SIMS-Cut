@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding=utf-8 -*-
 
-from tools.preprocess import listmatter, get_samples, listmatter_top_k_corr, renamer
+from tools.preprocess import listmatter, get_samples, listmatter_top_k_corr, renamer, get_size
 import pickle
 import os
 import os.path as osp
@@ -15,11 +15,15 @@ trace = logger.trace
 log = logging.getLogger()
 
 
-def SIMSCut_preprocess(data_name, A_matter, ptype, top_k, ifrenamer, sz):
+def SIMSCut_preprocess(data_name, A_matter, ptype, top_k, ifrenamer, sz=None):
+
     # ptype='gaussian'
     data_name_new = data_name + "_" + str(ptype)
 
     rawdata_path = data_name
+    if sz is None:
+        sz = get_size(rawdata_path)
+
     workspace = osp.join("process", data_name_new, "")
     if not osp.exists(workspace):
         log.debug("mkdir [{}]".format(workspace))
@@ -45,10 +49,7 @@ def SIMSCut_preprocess(data_name, A_matter, ptype, top_k, ifrenamer, sz):
     log.debug(matters_20)
     log.debug(corr_20)
 
-    # print(matters_20)
-    # print(corr_20)
-    # print(len(matters_20))
     log.debug("extract top [{}] data samples...".format(top_k))
     test_samples_top = get_samples(rawdata_path, matters_20, preprocess_path, ptype=ptype, sz=sz)
     log.debug(workspace)
-    return data_name_new, len(matters_candidate)
+    return data_name_new, len(matters_candidate), sz

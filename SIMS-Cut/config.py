@@ -17,8 +17,9 @@ ptype_list = ["gaussian", None]
 top_k_list = [20]
 # 是否对数据进行重命名
 renamer_list = [1]
-# 输入数据尺寸
-sz_list = [[256, 256]]
+# 输入数据尺寸，如果留空，则会从质谱仪数据中自动读入尺寸
+# sz_list = [[256, 256]]
+sz_list = []
 # RBM 处理的轮数
 epoch_list = [5]
 # RMB 参数
@@ -44,8 +45,9 @@ ptype_list = ["gaussian", None]
 top_k_list = [20]
 # 是否对数据进行重命名
 renamer_list = [1]
-# 输入数据尺寸
-sz_list = [[1792, 512]]
+# 输入数据尺寸，如果留空，则会从质谱仪数据中自动读入尺寸
+# sz_list = [[1792, 512]]
+sz_list = []
 # RBM 处理的轮数
 epoch_list = [5]
 # RMB 参数

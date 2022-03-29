@@ -135,6 +135,32 @@ def find_cooccorance_matters1(path1, path2):
     return common_matter_list
 
 
+@trace()
+def get_size(rawdata_path):
+    files = os.listdir(rawdata_path)
+
+    for f in files:
+        if "total" in f:
+            # 找到那个文件名字里面带 total 的
+            total_file = f
+            break
+    total_file_full_path = osp.join(rawdata_path, total_file)
+    with open(total_file_full_path, "r") as inf:
+        lines = inf.readlines()
+        line_image_size = lines[7]
+        assert "Image" in line_image_size
+    log.debug(line_image_size)
+
+    sz = line_image_size.split("x", maxsplit=1)
+    sz[0] = int(sz[0].split()[-1])
+    sz[1] = int(sz[1].split()[0])
+    log.debug("size: [{sz}]".format(sz=sz))
+
+    assert len(sz) == 2
+
+    return sz
+
+
 # 读取质谱仪文本数据并存储为 matlab 格式
 @trace()
 def get_samples(rawdata_path, matters_candidate, tosave_path, ptype=None, sz=[256, 256]):
