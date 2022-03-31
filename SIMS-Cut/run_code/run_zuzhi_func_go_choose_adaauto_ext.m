@@ -54,7 +54,7 @@ function [] = run_zuzhi_func_go_choose_adaauto_ext(process_path, test_sample_all
     end
 
     iters_max = 100;
-    beta_list = [0.5, 0.7, 0.9];
+    beta_list = [0.5, 0.7];
     n_matter = size(test_samples_20, 2)
     data_file = {};
     label_file = {};
@@ -80,9 +80,3 @@ function [] = run_zuzhi_func_go_choose_adaauto_ext(process_path, test_sample_all
         collect_pixel_data_1208zuzhi_ext;
         save(fullfile(save_final_labeling_path, strcat('datamat_', num2str(beta), '.mat')), 'data_mat', '-v7.3');
     end
-
-    %idx=length(beta_list);
-    disp(['idx', num2str(idx)])
-    collect_pixel_data_1208zuzhi;
-    disp(['idx', num2str(idx)])
-    save(fullfile(save_final_labeling_path, strcat(date, '_datamat_', test_sample_all_file_simple)), 'data_mat', '-v7.3');
