@@ -19,7 +19,7 @@ python SIMSCutpipe.py
 
 Matlab R2019B 及以上版本
 需要安装的组件：
-MATLAB
-Image Processing Toolbox
-Statistics and Machine Learning Toolbox
-Parallel Computing Toolbox
+- MATLAB
+- Image Processing Toolbox
+- Statistics and Machine Learning Toolbox
+- Parallel Computing Toolbox

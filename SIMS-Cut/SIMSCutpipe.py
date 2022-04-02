@@ -52,8 +52,8 @@ def preprecess_data(process_data_path, matlab_info, dataname, A_matter, top_k, r
         log.error("check: [{}] exist !!".format(dest))
         os._exit(0)
 
-    log.debug("copy from [{}] to [{}]".format(src, dest))
-    shutil.copytree(src, dest)
+    log.debug("move from [{}] to [{}]".format(src, dest))
+    shutil.move(src, dest)
 
     matlab_info["name_list"].append(data_name + ext)
     matlab_info["nei_type"].append(4)

@@ -1,4 +1,4 @@
-function [edges] = get_BK_pairwise(x, mode, Height, Width)
+function [edges] = get_BK_pairwise_ext(x, mode, Height, Width)
     %edge：numEdge*6的矩阵
     %注意，这里e00和e11（也就是label相同的情况），权重是0
     %x是输入数据，65536*355

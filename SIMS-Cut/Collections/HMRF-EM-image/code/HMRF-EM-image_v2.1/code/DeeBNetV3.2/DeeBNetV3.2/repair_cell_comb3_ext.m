@@ -27,10 +27,13 @@ iters_max = 200;
 iters_num = 0;
 
 height = sz(1);
-fold_mean = 1.00;
 width = sz(2);
+
+fold_mean = 1.00; % 控制下一层与当前层的区别
+
 %指大于0.75分位数的细胞要考虑分裂(75分位数)
-attention_threshold = 40;
+% attention_threshold = 40;
+
 labeling_mat = zeros(height * width, iters_num);
 % 构建labeling_mat，并看哪个图的cell最多
 
@@ -140,6 +143,7 @@ for i = 1:iters_num
 
         if length(k) > 2
             % 好奇，有没有超过2个父节点的细胞？
+            % 算法建立细胞树的时候，就不会存在这种情况
             disp(['loop2 basterd:', num2str(i), ':', num2str(j), ':', k])
 
         end
@@ -192,6 +196,10 @@ leaf_set = setdiff(all_set, parent_set);
 % 不在父节点的节点，就是叶子节点
 
 mean_leaf_area = median(area_list(leaf_set));
+% 细胞核面积的中位数
+% 尝试去找细胞核的面积不是过大，也不是过小，不极端的。
+% 同时细胞核跟其他的细胞核不重叠的。
+% 从叶子节点向上回溯，找到最大的那个，不跟其他细胞核重叠的就作为当前簇的一个细胞核分割结果。
 area_threshold = fold_mean * mean_leaf_area;
 single_leaf_set = leaf_set;
 %对每一个叶子节点往上回溯，找到level最低的不分裂节点

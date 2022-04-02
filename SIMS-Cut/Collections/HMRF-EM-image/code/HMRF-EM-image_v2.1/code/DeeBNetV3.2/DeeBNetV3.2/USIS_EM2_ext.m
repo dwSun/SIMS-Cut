@@ -38,9 +38,6 @@ function [num_pos_li, beta_li] = USIS_EM2_ext(test_samples, batch_name, beta, di
 
     cur_labeling = init_labeling;
 
-    edges_sigma = 8;
-    lambda = 0.5;
-
     global edges;
     edges = ed;
     edges(:, 3:end) = edges(:, 3:end) / divn;
@@ -59,7 +56,7 @@ function [num_pos_li, beta_li] = USIS_EM2_ext(test_samples, batch_name, beta, di
 
     while (iters <= niters & sum(cur_labeling == 2) > 10)
         % 只要没达到 100 个迭代次数 或者，该层细胞标注中，还能找到 10个以上的细胞，就继续循环。
-        % FIXME，20个质峰，按照相关性排序，所以拍最后的那个质峰，应该跟细胞核没啥关系了。
+        % FIXME，20个质峰，按照相关性排序，所以排最后的那个质峰，应该跟细胞核没啥关系了。
 
         cell_count = sum(cur_labeling == 2)
         disp(["cell count:", num2str(cell_count)]);
@@ -72,6 +69,8 @@ function [num_pos_li, beta_li] = USIS_EM2_ext(test_samples, batch_name, beta, di
             disp([num2str(decrease_ratio)])
             disp(num_pos_li)
             %   cur_beta = cur_beta-0.01;
+            % beta 太大的时候，细胞核数量在扩张。
+            % 如果细胞核有明显的扩张则动态缩小beta
         end
 
         if (iters > 2)
@@ -89,7 +88,7 @@ function [num_pos_li, beta_li] = USIS_EM2_ext(test_samples, batch_name, beta, di
         pre_labeling = cur_labeling;
 
         % 这里 n_epoch=5 那就是只训练了5次，够么。
-        % 这个 rbm 似乎就是个单隐层的线性网络。
+        % 这个 rbm 似乎就是个单隐层的sigmoid网络。
         % PF 居然是个标量，不是向量。
         [bg_rbm, fg_rbm, PF] = train_rbm_multi_ext(normed_data, cur_labeling, n_hidden, n_epoch, cur_beta, sz, train_ratio);
 

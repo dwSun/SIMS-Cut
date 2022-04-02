@@ -33,15 +33,16 @@ function [] = run_zuzhi_func_go_choose_adaauto_ext(process_path, test_sample_all
 
         if (auto_type == 4)
             edge_auto = get_BK_pairwise_ext(test_samples_20, 1, sz(1), sz(2));
+            % 马尔科夫随机场的输出，作为 graph cut 算法的输入使用
             save(fullfile(cut_edges_path, strcat('edges_ori_auto_', test_sample20_file)), 'edge_auto');
-            edge_ada = adaptive_constrast2_ext(edge_auto, 21, sz(1), sz(2));
+            edge_ada = adaptive_constrast2_ext(edge_auto, 21, sz(1), sz(2)); % 数据的平滑处理
             save(fullfile(cut_edges_path, strcat('edges_ori_ada_', test_sample20_file)), 'edge_ada');
         end
 
         if (auto_type == 8)
             edge_auto = get_BK_pairwise_8_autosigma(test_samples_20, 1, sz(1), sz(2));
             save(fullfile(cut_edges_path, strcat('edges_ori_auto_', test_sample20_file)), 'edge_auto');
-            edge_ada = adaptive_constrast2(edge_auto, 21, sz(1), sz(2));
+            edge_ada = adaptive_constrast2_ext(edge_auto, 21, sz(1), sz(2));
             save(fullfile(cut_edges_path, strcat('edges_ori_ada_', test_sample20_file)), 'edge_ada');
         end
 
@@ -54,7 +55,7 @@ function [] = run_zuzhi_func_go_choose_adaauto_ext(process_path, test_sample_all
     end
 
     iters_max = 100;
-    beta_list = [0.5, 0.7];
+    beta_list = [0.5, 0.7]; % 调节 rbm 算法的迭代速度快慢，0.5 直接收缩，0.7 先扩张后收缩。
     n_matter = size(test_samples_20, 2)
     data_file = {};
     label_file = {};
