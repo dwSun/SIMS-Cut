@@ -23,7 +23,10 @@ import config
 
 # 生成 matlab 脚本的路径
 cur_time_str = time.strftime("%Y%m%d_%H%M")
-matlab_script_name = osp.join(osp.dirname(osp.abspath(__file__)), "run_code/run_{0}.m".format(cur_time_str))
+matlab_script_name = osp.join(
+    osp.dirname(osp.abspath(__file__)),
+    "run_code/run_{0}.m".format(cur_time_str),
+)
 
 
 matlab_info = {
@@ -36,14 +39,31 @@ matlab_info = {
     "epoch_list": [],
     "rbm_ratio_list": [],
     "sz_list": [],
+    "beta_list": [],
 }
 
 os.chdir(config.process_data_path)
 
 
 @trace()
-def preprecess_data(process_data_path, matlab_info, dataname, A_matter, top_k, rename, divn, epoch, rbm_ratio, ptype, ext, sz=None):
-    data_name, n_matter, sz = SIMSCut_preprocess(dataname, A_matter, ptype, top_k, rename, sz)
+def preprecess_data(
+    process_data_path,
+    matlab_info,
+    dataname,
+    A_matter,
+    top_k,
+    rename,
+    divn,
+    epoch,
+    rbm_ratio,
+    beta,
+    ptype,
+    ext,
+    sz=None,
+):
+    data_name, n_matter, sz = SIMSCut_preprocess(
+        dataname, A_matter, ptype, top_k, rename, sz
+    )
 
     src = osp.join(process_data_path, "process", data_name)
     dest = osp.join(process_data_path, "process", data_name) + ext
@@ -58,32 +78,37 @@ def preprecess_data(process_data_path, matlab_info, dataname, A_matter, top_k, r
     matlab_info["name_list"].append(data_name + ext)
     matlab_info["nei_type"].append(4)
     matlab_info["edge_type_list"].append(ext[1:])
-    matlab_info["test_sample_all_file_list"].append("test_samples_{n_matter}.mat".format(n_matter=n_matter))
+    matlab_info["test_sample_all_file_list"].append(
+        "test_samples_{n_matter}.mat".format(n_matter=n_matter)
+    )
     matlab_info["top_k_name_list"].append("test_samples_{0}".format(top_k))
     matlab_info["divn_list"].append(divn)
     matlab_info["epoch_list"].append(epoch)
     matlab_info["rbm_ratio_list"].append(rbm_ratio)
     matlab_info["sz_list"].append(sz)
+    matlab_info["beta_list"].append(beta)
 
 
 for i in range(len(config.dataname_list)):
-    dataname = config.dataname_list[i]
-    A_matter = config.A_matter_list[i]
-    top_k = config.top_k_list[i]
-    rename = config.renamer_list[i]
-    divn = config.divn_list[i]
-    epoch = config.epoch_list[i]
-    rbm_ratio = config.rbm_ratio_list[i]
-    if len(config.sz_list) == 0:
-        sz = None
-    else:
-        sz = config.sz_list[i]
-
     for ptype in config.ptype_list:
         for ext in ["_ada", "_auto"]:
             # 这里 ada 和 auto 主要是用于 matlab 里面处理的不同，跟 python 的代码没有关系。
             log.debug("#" * 10)
-            preprecess_data(config.process_data_path, matlab_info, dataname, A_matter, top_k, rename, divn, epoch, rbm_ratio, ptype, ext, sz)
+            preprecess_data(
+                config.process_data_path,
+                matlab_info,
+                config.dataname_list[i],
+                config.A_matter_list[i],
+                config.top_k_list[i],
+                config.renamer_list[i],
+                config.divn_list[i],
+                config.epoch_list[i],
+                config.rbm_ratio_list[i],
+                config.beta_list[i],
+                ptype,
+                ext,
+                sz=None if len(config.sz_list) == 0 else config.sz_list[i],
+            )
 
 
 matlab_code_temp = (
@@ -100,7 +125,7 @@ use_edges = 0;
 for i=1:size(name_list,1)
     process_path = fullfile(process_path_pref,name_list{i});
     test_sample_all_file = [test_sample_all_file_list{i}];
-    run_zuzhi_func_go_choose_adaauto_ext(process_path,test_sample_all_file,top_k_name_list{i},use_edges,edge_type_list{i},4,divn_list{i},sz_list{i},epoch_list{i},rbm_ratio_list{i});
+    run_zuzhi_func_go_choose_adaauto_ext(process_path,test_sample_all_file,top_k_name_list{i},use_edges,edge_type_list{i},4,divn_list{i},sz_list{i},epoch_list{i},rbm_ratio_list{i},beta_list{i});
 end
 """
 )

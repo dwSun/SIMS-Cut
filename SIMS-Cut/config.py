@@ -4,7 +4,6 @@
 ################
 # HCC-05-N1-NEG
 ################
-"""
 # 要处理的数据目录
 dataname_list = ["HCC-05-N1-NEG"]
 # 细胞核相关的数据
@@ -24,6 +23,8 @@ sz_list = []
 epoch_list = [5]
 # RMB 参数
 rbm_ratio_list = [0.1]
+
+beta_list = [0.5]
 
 # 质谱仪数据目录
 process_data_path = "/Users/david/Code/Projects/数字化病理/sample_data"
@@ -53,5 +54,9 @@ epoch_list = [5]
 # RMB 参数
 rbm_ratio_list = [0.1]
 
+beta_list = [0.5]
+
 # 质谱仪数据目录
 process_data_path = "/Users/david/Code/Projects/数字化病理/sample_data"
+
+"""

@@ -1,4 +1,4 @@
-function [] = run_zuzhi_func_go_choose_adaauto_ext(process_path, test_sample_all_file, test_sample20_file, use_edges, edge_type, auto_type, divn, sz, n_epoch, train_ratio)
+function [] = run_zuzhi_func_go_choose_adaauto_ext(process_path, test_sample_all_file, test_sample20_file, use_edges, edge_type, auto_type, divn, sz, n_epoch, train_ratio, beta)
     % save_mid_path不要有/
     save_final_labeling_path = fullfile(process_path, 'cut/rst/');
     test_sample_path = fullfile(process_path, 'preprocess/');
@@ -55,29 +55,27 @@ function [] = run_zuzhi_func_go_choose_adaauto_ext(process_path, test_sample_all
     end
 
     iters_max = 100;
-    beta_list = [0.5, 0.7]; % 调节 rbm 算法的迭代速度快慢，0.5 直接收缩，0.7 先扩张后收缩。
+    % beta_list = [0.5, 0.7]; % 调节 rbm 算法的迭代速度快慢，0.5 直接收缩，0.7 先扩张后收缩。
     n_matter = size(test_samples_20, 2)
     data_file = {};
     label_file = {};
     idx = 1;
     %divn=10;
-    for beta = beta_list
-        date = datestr(now, 'HHMMSSFFF')
+    date = datestr(now, 'HHMMSSFFF')
 
-        if (strcmp(edge_type, 'ada'))
-            USIS_EM2_ext(test_samples_20, strcat(sample_name, '_ada_test'), beta, divn, edge_ada, iters_max, save_pref, date, n_matter, sz, n_epoch, train_ratio);
-        else
+    if (strcmp(edge_type, 'ada'))
+        USIS_EM2_ext(test_samples_20, strcat(sample_name, '_ada_test'), beta, divn, edge_ada, iters_max, save_pref, date, n_matter, sz, n_epoch, train_ratio);
+    else
 
-            USIS_EM2_ext(test_samples_20, strcat(sample_name, '_ada_test'), beta, divn, edge_auto, iters_max, save_pref, date, n_matter, sz, n_epoch, train_ratio);
-        end
-
-        path = fullfile(save_pref, '/EM_mid_rst/');
-        file_prefix = strcat('cur_labeling_', date, '_', sample_name, '_ada_test_20_Fmeasure_', num2str(beta), '_div', num2str(divn), '_', '_');
-        disp(file_prefix);
-        repair_cell_comb3_ext;
-        data_file{idx} = test_sample_all_file;
-        label_file{idx} = strcat(save_final_labeling_path, 'final_labeling_', num2str(beta), '.mat');
-
-        collect_pixel_data_1208zuzhi_ext;
-        save(fullfile(save_final_labeling_path, strcat('datamat_', num2str(beta), '.mat')), 'data_mat', '-v7.3');
+        USIS_EM2_ext(test_samples_20, strcat(sample_name, '_ada_test'), beta, divn, edge_auto, iters_max, save_pref, date, n_matter, sz, n_epoch, train_ratio);
     end
+
+    path = fullfile(save_pref, '/EM_mid_rst/');
+    file_prefix = strcat('cur_labeling_', date, '_', sample_name, '_ada_test_20_Fmeasure_', num2str(beta), '_div', num2str(divn), '_', '_');
+    disp(file_prefix);
+    repair_cell_comb3_ext;
+    data_file{idx} = test_sample_all_file;
+    label_file{idx} = strcat(save_final_labeling_path, 'final_labeling_', num2str(beta), '.mat');
+
+    collect_pixel_data_1208zuzhi_ext;
+    save(fullfile(save_final_labeling_path, strcat('datamat_', num2str(beta), '.mat')), 'data_mat', '-v7.3');
