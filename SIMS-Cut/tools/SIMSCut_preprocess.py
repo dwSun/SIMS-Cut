@@ -1,17 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding=utf-8 -*-
 
-from tools.preprocess import listmatter, get_samples, listmatter_top_k_corr, renamer, get_size
+from tools.preprocess import (
+    listmatter,
+    get_samples,
+    listmatter_top_k_corr,
+    renamer,
+    get_size,
+)
 import pickle
 import os
 import os.path as osp
 
 import logging
 
-import tools.logger as logger
+import log2file
 
 
-trace = logger.trace
+trace = log2file.trace
 log = logging.getLogger()
 
 
@@ -43,13 +49,19 @@ def SIMSCut_preprocess(data_name, A_matter, ptype, top_k, ifrenamer, sz=None):
         log.debug("save [{}]".format(pik_path))
         pickle.dump(matters_candidate, of)
 
-    test_samples = get_samples(rawdata_path, matters_candidate, preprocess_path, sz=sz)
+    test_samples = get_samples(
+        rawdata_path, matters_candidate, preprocess_path, sz=sz
+    )
 
-    matters_20, corr_20 = listmatter_top_k_corr(test_samples, matters_candidate, A_matter, top_k)
+    matters_20, corr_20 = listmatter_top_k_corr(
+        test_samples, matters_candidate, A_matter, top_k
+    )
     log.debug(matters_20)
     log.debug(corr_20)
 
     log.debug("extract top [{}] data samples...".format(top_k))
-    test_samples_top = get_samples(rawdata_path, matters_20, preprocess_path, ptype=ptype, sz=sz)
+    test_samples_top = get_samples(
+        rawdata_path, matters_20, preprocess_path, ptype=ptype, sz=sz
+    )
     log.debug(workspace)
     return data_name_new, len(matters_candidate), sz

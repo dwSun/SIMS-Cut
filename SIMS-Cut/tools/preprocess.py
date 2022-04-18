@@ -13,10 +13,10 @@ import math
 
 import logging
 
-import tools.logger as logger
+import log2file
 
 
-trace = logger.trace
+trace = log2file.trace
 log = logging.getLogger()
 
 
@@ -34,7 +34,9 @@ def matter_filter(threshold, path):
     matter_nonezeropixels_dict = {}
     for matter, pixel in matter_pixel_dict.iteritems():
         matter_nonezeropixels_dict[matter] = sum(map(lambda x: x >= 1, pixel))
-    sorted_dict = sorted(matter_nonezeropixels_dict.items(), key=operator.itemgetter(1))
+    sorted_dict = sorted(
+        matter_nonezeropixels_dict.items(), key=operator.itemgetter(1)
+    )
     return sorted_dict
 
 
@@ -163,14 +165,22 @@ def get_size(rawdata_path):
 
 # 读取质谱仪文本数据并存储为 matlab 格式
 @trace()
-def get_samples(rawdata_path, matters_candidate, tosave_path, ptype=None, sz=[256, 256]):
+def get_samples(
+    rawdata_path, matters_candidate, tosave_path, ptype=None, sz=[256, 256]
+):
     rst_sample = []
     for matter in matters_candidate:
         matter = "{0:.2f}".format(matter)
 
         cur_file = osp.join(rawdata_path, matter + ".txt")
         with open(cur_file, "r") as inf:
-            cur_matter_pd = pd.read_csv(inf, sep=" ", skiprows=9, header=None, names=["row", "col", "val"])
+            cur_matter_pd = pd.read_csv(
+                inf,
+                sep=" ",
+                skiprows=9,
+                header=None,
+                names=["row", "col", "val"],
+            )
 
         cur_matter_data = np.array(cur_matter_pd["val"])
         # log.debug(cur_matter_data.shape)
@@ -193,7 +203,10 @@ def get_samples(rawdata_path, matters_candidate, tosave_path, ptype=None, sz=[25
     save_path = osp.join(tosave_path, "samples.mat")
 
     savemat(
-        tosave_path + "test_samples_{num_features}.mat".format(num_features=len(matters_candidate)),
+        tosave_path
+        + "test_samples_{num_features}.mat".format(
+            num_features=len(matters_candidate)
+        ),
         {"test_samples": rst_sample},
         format="7.3",
         matlab_compatible=True,
@@ -203,7 +216,11 @@ def get_samples(rawdata_path, matters_candidate, tosave_path, ptype=None, sz=[25
 
 @trace()
 def listmatter_top_k_corr(test_samples, matters_candidate, A_matter, top_k):
-    log.debug("get top [{0}] correlation matters with [{1}]...".format(top_k, A_matter))
+    log.debug(
+        "get top [{0}] correlation matters with [{1}]...".format(
+            top_k, A_matter
+        )
+    )
     cor_array = np.zeros(shape=(len(matters_candidate)))
     A_matter = float(A_matter)
     top_k = int(top_k)

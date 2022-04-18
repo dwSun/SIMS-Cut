@@ -9,14 +9,14 @@ import time
 import os.path as osp
 import logging
 
+import log2file
+
 from tools.preprocess import renamer
 
 
-from tools import logger
+log2file.init(console=True)
 
-logger.init(console=True)
-
-trace = logger.trace
+trace = log2file.trace
 log = logging.getLogger()
 
 import config
