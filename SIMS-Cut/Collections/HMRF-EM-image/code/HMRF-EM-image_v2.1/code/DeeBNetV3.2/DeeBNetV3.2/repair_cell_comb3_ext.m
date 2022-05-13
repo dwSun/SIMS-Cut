@@ -46,7 +46,7 @@ for i = 1:iters_max
     if exist(cur_file, 'file')
         iters_num = i;
 
-        cur_file = [path, file_prefix, num2str(i), file_sufix];
+        %cur_file = [path, file_prefix, num2str(i), file_sufix];
         disp(['load: ', cur_file]);
         load(cur_file);
 
