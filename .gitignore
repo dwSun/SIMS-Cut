@@ -1,3 +1,4 @@
 *.pyc
 ._*.*
 __MACOSX/
+*.log

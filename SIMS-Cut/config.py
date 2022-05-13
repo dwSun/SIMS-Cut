@@ -28,8 +28,7 @@ rbm_ratio_list = [0.1]
 beta_list = [0.5]
 
 # 质谱仪数据目录
-process_data_path = "/Volumes/ExternalSSD/数字化病理/sample_data"
-
+process_data_path = "/home/robu/dwSun/数字化病理/sample_data"
 
 """
 ################
