@@ -39,7 +39,7 @@ while (1)
         sz(1) = h;
         sz(2) = w;
         display(sz);
-        run_zuzhi_func_go_choose_adaauto_ext(process_path, test_sample_all_file, top_k_name_list, use_edges, edge_type_list, 4, divn_list, sz, epoch_list, rbm_ratio_list, beta_list);
+        run_zuzhi_func_go_choose_adaauto_ext(process_path, test_sample_all_file, top_k_name, use_edges, edge_type, 4, divn, sz, epoch, rbm_ratio, beta);
     end
 
     break

@@ -91,7 +91,7 @@ def preprecess_data(
     matlab_info["sz_list"].append(sz)
     matlab_info["beta_list"].append(beta)
 
-    return sz
+    return n_matter, sz
 
 
 for i in range(len(config.dataname_list)):
@@ -99,7 +99,7 @@ for i in range(len(config.dataname_list)):
         for ext in ["_ada", "_auto"]:
             # 这里 ada 和 auto 主要是用于 matlab 里面处理的不同，跟 python 的代码没有关系。
             log.debug("#" * 10)
-            sz = preprecess_data(
+            n_matter, sz = preprecess_data(
                 config.process_data_path,
                 matlab_info,
                 config.dataname_list[i],
@@ -136,23 +136,23 @@ for i in range(len(config.dataname_list)):
                     + f'"{str(config.dataname_list[i])+"_"+str(ptype)+ext}"'
                     + "\n"
                 )
-                f.write("edge_type_list=" + f"'{ext[1:]}'" + "\n")
-                f.write("test_sample_all_file='test_samples_275.mat'\n")
+                f.write("edge_type=" + f"'{ext[1:]}'" + "\n")
+                f.write("test_sample_all_file='test_samples_{0}.mat'\n".format(n_matter))
                 f.write(
-                    "top_k_name_list='test_samples_{0}'".format(
+                    "top_k_name='test_samples_{0}'".format(
                         config.top_k_list[i]
                     )
                     + "\n"
                 )
                 f.write("%float\n")
                 f.write(
-                    "rbm_ratio_list=" + str(config.rbm_ratio_list[i]) + "\n"
+                    "rbm_ratio=" + str(config.rbm_ratio_list[i]) + "\n"
                 )
-                f.write("beta_list=" + str(config.beta_list[i]) + "\n")
+                f.write("beta=" + str(config.beta_list[i]) + "\n")
                 f.write("%int\n")
                 f.write("nei_type=" + str(4) + "\n")
-                f.write("divn_list=" + str(config.divn_list[i]) + "\n")
-                f.write("epoch_list=" + str(config.epoch_list[i]) + "\n")
+                f.write("divn=" + str(config.divn_list[i]) + "\n")
+                f.write("epoch=" + str(config.epoch_list[i]) + "\n")
                 f.write("h=" + str(sz[0]) + "\n")
                 f.write("w=" + str(sz[1]))
 

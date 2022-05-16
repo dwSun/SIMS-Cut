@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 ## Python 使用说明
 
-请按注释编辑 config.py 中相应的项目，在 process_data_path 项设置好质谱仪数据目录的路径，之后直接在该目录开启命令行，运行下述代码即可：
+请按注释编辑 config.py 中相应的项目，在 process_data_path 项设置好质谱仪数据目录的路径（**路径中应只有大小写字母、数字和下划线，不能以数字开头，请勿带空格**），之后直接在该目录开启命令行，运行下述代码即可：
 
 ```sh
 python SIMSCutpipe.py
