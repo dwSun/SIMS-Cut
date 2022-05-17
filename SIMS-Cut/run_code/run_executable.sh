@@ -18,7 +18,7 @@ read -p "proceed(Y/N)" choice
 
 if [ "$choice" == "Y" ]; then
     for cfg in $(ls config*|sort); do
-        bash -c "export RUN_CONFIG_FILE=$cfg && source $1 $2"
+        bash -c "export RUN_CONFIG_FILE='$cfg' && source $1 $2"
     done
 fi
 

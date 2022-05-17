@@ -32,7 +32,7 @@ else
     eval(scriptCode);
 
     process_path = fullfile(process_path_pref, name);
-    display(process_path`);
+    display(process_path);
     sz(1) = h;
     sz(2) = w;
     display(sz);
