@@ -2,6 +2,14 @@
 # -*- coding=utf-8 -*-
 
 
+# 对数据进行的处理,与数据无关
+ptype_list = ["gaussian", None]
+beta_list = [0.5, 0.7, 0.9]
+
+# 质谱仪数据目录
+process_data_path = "/home/robu/dwSun/数字化病理/sample_data"
+# process_data_path = "/Volumes/ExternalSSD/数字化病理/sample_data"
+
 """
 ################
 # HCC-05-N1-NEG
@@ -12,8 +20,6 @@ dataname_list = ["HCC-05-N1-NEG"]
 A_matter_list = [134.06]
 # 细胞核分割取的数据维度
 divn_list = [20]
-# 对数据进行的处理
-ptype_list = ["gaussian", None]
 # 细胞核分割取的数据维度
 top_k_list = [20]
 # 是否对数据进行重命名
@@ -25,11 +31,6 @@ sz_list = []
 epoch_list = [5]
 # RMB 参数
 rbm_ratio_list = [0.1]
-
-beta_list = [0.5]
-
-# 质谱仪数据目录
-process_data_path = "/home/robu/dwSun/数字化病理/sample_data"
 
 ################
 # HCC-05-T-big
@@ -54,13 +55,6 @@ epoch_list = [5]
 # RMB 参数
 rbm_ratio_list = [0.1]
 
-beta_list = [0.5]
-
-# 质谱仪数据目录
-process_data_path = "/Users/david/Code/Projects/数字化病理/sample_data"
-
-
-
 ################
 # HCC-05-T-big-1792x1024
 ################
@@ -70,8 +64,6 @@ dataname_list = ["HCC-05-T-big-1792x1024"]
 A_matter_list = [134.04]
 # 细胞核分割取的数据维度
 divn_list = [20]
-# 对数据进行的处理
-ptype_list = ["gaussian", None]
 # 细胞核分割取的数据维度
 top_k_list = [20]
 # 是否对数据进行重命名
@@ -83,14 +75,6 @@ sz_list = []
 epoch_list = [5]
 # RMB 参数
 rbm_ratio_list = [0.1]
-
-beta_list = [0.5]
-
-# 质谱仪数据目录
-process_data_path = "/Volumes/ExternalSSD/数字化病理/sample_data"
-
-
-
 
 ################
 # HCC-05-T-big-1792x1024
@@ -101,8 +85,6 @@ dataname_list = ["HCC-05-T-big-1792x1792"]
 A_matter_list = [134.04]
 # 细胞核分割取的数据维度
 divn_list = [20]
-# 对数据进行的处理
-ptype_list = ["gaussian", None]
 # 细胞核分割取的数据维度
 top_k_list = [20]
 # 是否对数据进行重命名
@@ -114,39 +96,26 @@ sz_list = []
 epoch_list = [5]
 # RMB 参数
 rbm_ratio_list = [0.1]
-
-beta_list = [0.5]
-
-# 质谱仪数据目录
-process_data_path = "/Volumes/ExternalSSD/数字化病理/sample_data"
-
 """
 
 
 ################
-# hcc19d_1_pos
+# hcc19d_1_pos,HCC-05-N1-NEG
 ################
 # 要处理的数据目录
-dataname_list = ["hcc19d_1_pos"]
+dataname_list = ["hcc19d 1 pos", "HCC-05-N1-NEG"]
 # 细胞核相关的数据
-A_matter_list = [134.07]
+A_matter_list = [134.07, 134.06]
 # 细胞核分割取的数据维度
-divn_list = [20]
-# 对数据进行的处理
-ptype_list = ["gaussian", None]
+divn_list = [20, 20]
 # 细胞核分割取的数据维度
-top_k_list = [20]
+top_k_list = [20, 20]
 # 是否对数据进行重命名
-renamer_list = [1]
+renamer_list = [1, 1]
 # 输入数据尺寸，如果留空，则会从质谱仪数据中自动读入尺寸
 # sz_list = [[256, 256]]
 sz_list = []
 # RBM 处理的轮数
-epoch_list = [5]
+epoch_list = [5, 5]
 # RMB 参数
-rbm_ratio_list = [0.1]
-
-beta_list = [0.9]
-
-# 质谱仪数据目录
-process_data_path = "/home/robu/dwSun/数字化病理/sample_data"
+rbm_ratio_list = [0.1, 0.1]
