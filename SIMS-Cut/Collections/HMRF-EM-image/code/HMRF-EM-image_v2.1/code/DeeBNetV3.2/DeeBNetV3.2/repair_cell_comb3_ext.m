@@ -295,5 +295,10 @@ save(strcat(save_final_labeling_path, 'final_labeling_', num2str(beta), '.mat'),
 final_labeling_img = logical(reshape(final_labeling, sz(1), sz(2))' - 1);
 imwrite(final_labeling_img, strcat(save_final_labeling_path, 'final_labeling_', num2str(beta), '.png'));
 img_134 = reshape(test_samples_20(:, 1), sz(1), sz(2))';
-imshowpair(img_134, final_labeling_img);
-print(strcat(save_final_labeling_path, 'final_labeling_merge134_', num2str(beta), '.png'), '-dpng');
+% 取消打印，避免问题
+% imshowpair(img_134, final_labeling_img);
+% print(strcat(save_final_labeling_path, 'final_labeling_merge134_', num2str(beta), '.png'), '-dpng');
+fused_img = imfuse(img_134, final_labeling_img);
+imwrite(fused_img, strcat(save_final_labeling_path, 'final_labeling_merge134_', num2str(beta), '.png'));
+
+%ref https://ww2.mathworks.cn/matlabcentral/answers/503039-how-to-save-imshowpair-figure-using-imwrite
