@@ -221,13 +221,9 @@ for i = leaf_set
     cur_leaf = i;
     cur_leaf_level = level_list(i);
 
-    while (cur_leaf ~= 0)
+    while (cur_leaf ~= 0 && cur_leaf_level > 0)
 
         cur_leaf_cell = cell_list(cur_leaf);
-
-        if (cur_leaf_level <= 0)
-            continue;
-        end
 
         cur_134_mean = mean(test_samples_20(labeling_mat(:, cur_leaf_level) == cur_leaf_cell, 1));
         intensity_134_list = [intensity_134_list, cur_134_mean];
